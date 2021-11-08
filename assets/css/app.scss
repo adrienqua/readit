@@ -1,0 +1,112 @@
+body {
+  background-color: #eee !important;
+  #app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .page-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  label {
+    display: block;
+  }
+  a {
+    text-decoration: none;
+  }
+  li {
+    list-style: none;
+    line-height: 2.25;
+  }
+  .loading {
+    justify-content: center;
+  }
+  .navbar-brand img {
+    max-height: 32px;
+  }
+  .article {
+    .article-item {
+      background-color: white;
+      border-radius: 5px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05);
+      .score {
+        width: unset;
+        display: flex;
+        flex-direction: column-reverse;
+        justify-content: start;
+        text-align: center;
+        background-color: #f3f3f3;
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+      }
+      .article-picture {
+        width: 126px;
+        img {
+          max-width: 110px;
+        }
+        i {
+          background-color: #dbdbdb;
+          font-size: 2.5rem;
+          height: 110px;
+          display: flex;
+          justify-content: center;
+          text-align: center;
+          flex-flow: column;
+          color: #bbbbbb;
+          border-radius: 5px;
+        }
+      }
+      .article-author small {
+        vertical-align: top;
+      }
+      a h3 {
+        color: #000;
+        font-size: 1.4rem;
+        transition: 0.3s;
+        &:hover {
+          color: #2240a2;
+        }
+      }
+      .article-tag {
+        transition: 0.3s;
+        &:hover {
+          background-color: #000 !important;
+          color: #fff;
+        }
+      }
+    }
+  }
+
+  .comment-item {
+    margin-bottom: 1.5rem !important;
+    border-left: solid 1px #e2e2e9;
+  }
+
+  .form-floating > textarea.form-control {
+    height: unset;
+  }
+  .article-content {
+    white-space: pre-line;
+  }
+
+  .register,
+  .login {
+    max-width: 400px;
+  }
+
+  footer {
+    background-color: #dedfe6;
+  }
+  .not-found {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: auto;
+    flex-direction: column;
+    h1 {
+      font-size: 10rem;
+    }
+  }
+}
