@@ -2,6 +2,7 @@ import axios from "axios";
 import { apiUrl } from "../config.js";
 import { getUserVotes } from "./userAPI.js";
 import { getCurrentUser } from "./auth";
+import { newVote } from "../services/voteAPI";
 
 const apiEndpoint = apiUrl + "articles";
 
@@ -22,7 +23,7 @@ export function getArticles() {
       return item;
     });
     console.log("getarticle", data);
-    return data;
+    return data.reverse();
   });
 }
 
@@ -40,9 +41,15 @@ export function updateArticle(id, component) {
 
 export function newArticle(component, file) {
   return axios.post(apiEndpoint, component).then((response) => {
-    const responseId = response.data.id;
-
+    const articleId = response.data["@id"].slice(1);
+    const userId = response.data.author["@id"].slice(1);
+    newVote({
+      user: userId,
+      article: articleId,
+      isUp: true,
+    });
     if (file) {
+      const responseId = response.data.id;
       const fileData = new FormData();
       fileData.append("file", file);
       return axios.post(apiEndpoint + "/" + responseId + "/picture", fileData);

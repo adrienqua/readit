@@ -8,8 +8,8 @@ import {
 } from "../services/articleAPI";
 import { updateUser } from "../services/userAPI";
 import { newVote, updateVote } from "../services/voteAPI";
-
 import { toast } from "react-toastify";
+import Modal from "./Modal";
 
 const ArticleList = (props) => {
   const [addVote, setAddVote] = useState();
@@ -174,12 +174,15 @@ const ArticleList = (props) => {
                 )}
               </div>
               <div className="col-auto p-2">
-                <Link
-                  to={`/tag/${article.tags[0].label}`}
-                  className="article-tag badge bg-secondary"
-                >
-                  {article.tags[0].label}
-                </Link>
+                {article.tags.map((tag) => (
+                  <Link
+                    to={`/tag/${tag.label}`}
+                    key={tag.id}
+                    className="article-tag badge bg-secondary mx-1"
+                  >
+                    {tag.label}
+                  </Link>
+                ))}
                 <span className="title d-inline-block px-2">
                   <Link to={`/article/${article.id}`}>
                     <h3 className="m-0"> {article.title}</h3>
@@ -199,10 +202,17 @@ const ArticleList = (props) => {
                 <span className="">
                   <button
                     className="btn btn-danger mx-1"
-                    onClick={() => handleDelete(article)}
+                    data-bs-toggle="modal"
+                    data-bs-target={`#confirmationModal${article.id}`}
                   >
                     <i className="fa fa-trash-o" aria-hidden="true"></i>
                   </button>
+                  <Modal
+                    id={article.id}
+                    handleDelete={() => handleDelete(article)}
+                    title="Supprimer l'article."
+                    content="Voulez vous vraiment supprimer votre article ?"
+                  />
                   <Link to={`/articles/${article.id}/edit`}>
                     <button className="btn btn-light mx-1">
                       <i className="fa fa-pencil" aria-hidden="true"></i>

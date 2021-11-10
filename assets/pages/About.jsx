@@ -32,7 +32,7 @@ const About = () => {
             </li>
             <li>
               <i className="fa fa-arrow-up" aria-hidden="true"></i> Système de
-              Vote.
+              Vote et Karma.
             </li>
             <li>
               <i className="fa fa-heart" aria-hidden="true"></i> Système de

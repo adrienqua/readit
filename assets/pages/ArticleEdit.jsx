@@ -8,6 +8,7 @@ import {
 import { getTags } from "../services/tagsAPI";
 import Input from "../common/Input";
 import { ToastContainer, toast } from "react-toastify";
+import { Multiselect } from "multiselect-react-dropdown";
 
 const ArticleEdit = (props) => {
   const [tags, setTags] = useState([]);
@@ -60,6 +61,15 @@ const ArticleEdit = (props) => {
     toast.success("Publication modifiée.");
   };
 
+  const onSelect = (selectedList, selectedItem) => {
+    setArticle({ ...article, tags: selectedList });
+    console.log(article.tags);
+  };
+
+  const onRemove = (selectedList, removedItem) => {
+    setArticle({ ...article, tags: selectedList });
+  };
+
   return (
     <React.Fragment>
       <h1>
@@ -95,14 +105,15 @@ const ArticleEdit = (props) => {
           />
           <label>Contenu</label>
         </div>
-        <Input
-          name="content"
-          label="Contenu"
-          handleChange={(e) => handleChange(e)}
-          value={article.content}
-          row="5"
+        <Multiselect
+          options={tags}
+          displayValue="label"
+          selectedValues={article.tags}
+          placeholder="Catégories"
+          onSelect={onSelect}
+          onRemove={onRemove}
         />
-        <div className="form-floating mb-3">
+        {/* <div className="form-floating mb-3">
           <select
             className="form-select"
             type="text"
@@ -118,7 +129,7 @@ const ArticleEdit = (props) => {
             ))}
           </select>
           <label>Catégorie</label>
-        </div>
+        </div> */}
 
         <input className="btn btn-primary mt-1" type="submit" value="Editer" />
       </form>

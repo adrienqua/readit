@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { newArticle } from "../services/articleAPI";
 import { getTags } from "../services/tagsAPI";
 import { toast } from "react-toastify";
-
+import { Multiselect } from "multiselect-react-dropdown";
 const ArticleNew = (props) => {
   const [tags, setTags] = useState([]);
   const [article, setArticle] = useState({
@@ -15,6 +15,7 @@ const ArticleNew = (props) => {
       },
     ],
     file: [],
+    score: 1,
   });
 
   const { user } = props;
@@ -49,10 +50,25 @@ const ArticleNew = (props) => {
     toast.success("Publication créée.");
   };
 
+  const onSelect = (selectedList, selectedItem) => {
+    const data = selectedList.map((d) => {
+      return { label: d.label };
+    });
+    setArticle({ ...article, tags: data });
+    console.log(article.tags);
+  };
+
+  const onRemove = (selectedList, removedItem) => {
+    const data = selectedList.map((d) => {
+      return { label: d.label };
+    });
+    setArticle({ ...article, tags: data });
+  };
+
   return (
     <React.Fragment>
       <h1>
-        <i class="fa fa-fw fa-newspaper-o" aria-hidden="true"></i> Créer une
+        <i className="fa fa-fw fa-newspaper-o" aria-hidden="true"></i> Créer une
         publication
       </h1>
 
@@ -89,23 +105,13 @@ const ArticleNew = (props) => {
           />
           <label>Contenu</label>
         </div>
-        <div className="form-floating mb-3">
-          <select
-            className="form-select"
-            type="text"
-            name="label"
-            placeholder=" "
-            value={article.tags[0].label}
-            onChange={(e) =>
-              setArticle({ ...article, tags: [{ label: e.target.value }] })
-            }
-          >
-            {tags.map((tag) => (
-              <option key={tag.label}>{tag.label}</option>
-            ))}
-          </select>
-          <label>Catégorie</label>
-        </div>
+        <Multiselect
+          options={tags}
+          displayValue="label"
+          placeholder="Catégories"
+          onSelect={onSelect}
+          onRemove={onRemove}
+        />
         <input className="btn btn-primary mt-1" type="submit" value="Publier" />
       </form>
     </React.Fragment>

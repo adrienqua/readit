@@ -7,7 +7,7 @@ import {
 } from "../services/commentAPI";
 import { toast } from "react-toastify";
 import Input from "./Input";
-
+import Modal from "./Modal";
 const Comments = (props) => {
   const [addComment, setAddComment] = useState({
     content: "ok",
@@ -139,10 +139,18 @@ const Comments = (props) => {
                         </button>
                         <button
                           className="btn btn-secondary p-0 mx-1"
-                          onClick={() => handleDelete(comment)}
+                          data-bs-toggle="modal"
+                          data-bs-target={`#confirmationModal${comment.id}`}
                         >
                           <i className="fa fa-fw fa-times"></i>
                         </button>
+
+                        <Modal
+                          id={comment.id}
+                          handleDelete={() => handleDelete(comment)}
+                          title="Supprimer le commentaire."
+                          content="Voulez vous vraiment supprimer votre commentaire ?"
+                        />
                       </span>
                     )}
                   </div>
