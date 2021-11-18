@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import { newArticle } from "../services/articleAPI";
 import { getTags } from "../services/tagsAPI";
 import { toast } from "react-toastify";
+import Input from "../common/Input";
 import { Multiselect } from "multiselect-react-dropdown";
+
 const ArticleNew = (props) => {
   const [tags, setTags] = useState([]);
   const [article, setArticle] = useState({
@@ -73,38 +75,23 @@ const ArticleNew = (props) => {
       </h1>
 
       <form onSubmit={handleSubmit} className="mt-4">
-        <div className="form-floating mb-3">
-          <input
-            className="form-control"
-            type="text"
-            name="title"
-            placeholder=" "
-            value={article.title}
-            onChange={(e) => handleChange(e)}
-          />
-          <label>Titre</label>
-        </div>
-        <div className="form-group mb-3">
-          <label className="form-label">Téléverser une image</label>
-          <input
-            className="form-control form-control"
-            type="file"
-            name="picture"
-            onChange={(e) => setArticle({ ...article, file: e.target.files })}
-          />
-        </div>
-        <div className="form-floating mb-3">
-          <textarea
-            className="form-control"
-            type="text"
-            name="content"
-            placeholder=" "
-            value={article.content}
-            onChange={(e) => handleChange(e)}
-            rows="5"
-          />
-          <label>Contenu</label>
-        </div>
+        <Input
+          name="title"
+          label="Titre"
+          handleChange={(e) => handleChange(e)}
+        />
+        <Input
+          type="file"
+          name="picture"
+          label="Téléverser une image"
+          handleChange={(e) => setArticle({ ...article, file: e.target.files })}
+        />
+        <Input
+          input="textarea"
+          name="content"
+          label="Contenu"
+          handleChange={(e) => handleChange(e)}
+        />
         <Multiselect
           options={tags}
           displayValue="label"

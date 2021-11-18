@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getArticle, getComments } from "../services/articleAPI";
 import { newComment } from "../services/commentAPI";
 import Comments from "../common/Comments";
+import Score from "../common/Score";
 
 const ArticleDetail = (props) => {
   const [comments, setComments] = useState([]);
@@ -48,6 +49,7 @@ const ArticleDetail = (props) => {
     setComments(data);
   };
 
+  const updateScore = () => {};
   const date = (format) => {
     var options = { year: "numeric", month: "long", day: "numeric" };
     return format.toLocaleString().slice(0, 19).replace("T", " à ");
@@ -65,6 +67,7 @@ const ArticleDetail = (props) => {
             </div>
           ) : (
             <React.Fragment>
+              <Score data={article} updateScore={updateScore} />
               <span className="badge bg-secondary">
                 {article.tags[0].label}
               </span>
