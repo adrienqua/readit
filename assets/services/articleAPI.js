@@ -22,7 +22,6 @@ export function getArticles() {
       }
       return item;
     });
-    console.log("getarticle", data);
     return data.reverse();
   });
 }
