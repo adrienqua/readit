@@ -2,16 +2,16 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\ORM\Mapping as ORM;
 use App\Repository\TagRepository;
 use ApiPlatform\Core\Annotation\ApiFilter;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Annotation\ApiSubresource;
-
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ApiResource(
@@ -19,7 +19,7 @@ use ApiPlatform\Core\Annotation\ApiSubresource;
  *     denormalizationContext={"groups"={"tag:write"}}
  * )
  * @ApiFilter(SearchFilter::class, properties={"label": "exact", "id": "exact"})
- * 
+ *
  * @ORM\Entity(repositoryClass=TagRepository::class)
  */
 class Tag
@@ -28,23 +28,23 @@ class Tag
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * 
+     *
      * @Groups({"tag:read","article:read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
-     * 
+     * @Assert\NotBlank
      * @Groups({"tag:read", "tag:write", "article:read", "article:write"})
      */
     private $label;
 
     /**
      * @ORM\ManyToMany(targetEntity=Article::class, mappedBy="tags")
-     * 
+     *
      * @ApiSubresource
-     * 
+     *
      */
     private $articles;
 

@@ -16,15 +16,14 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 
-
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
- * 
+ *
  * @ApiResource(
  *      normalizationContext={"groups"={"user:read"}},
  *      denormalizationContext={"groups"={"user:write"}},
  * )
- * 
+ *
  * @ApiFilter(SearchFilter::class, properties={"username": "exact", "id": "exact"})
  */
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -33,21 +32,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * 
-     * @Groups({"user:read", "article:read", "comment:read"})
+     *
+     * @Groups({"user:read", "article:read", "comment:read", "favorite:read" })
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
-     * 
+     *
      * @Groups({"user:read", "user:write"})
      */
     private $email;
 
     /**
      * @ORM\Column(type="json")
-     * 
+     *
      * @Groups("user:read")
      */
     private $roles = [];
@@ -55,34 +54,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
-     * 
+     *
      */
     private $password;
 
     /**
      * @Groups("user:write")
-     * 
+     *
      * @SerializedName("password")
      */
     private $plainPassword;
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
-     * 
+     *
      * @Groups({"user:read", "user:write", "comment:read", "article:read"})
      */
     private $username;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * 
+     *
      * @Groups({"user:read", "user:write"})
      */
     private $firstname;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * 
+     *
      * @Groups({"user:read", "user:write"})
      */
     private $lastname;
@@ -96,7 +95,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\OneToMany(targetEntity=Comment::class, mappedBy="author", orphanRemoval=true)
-     * 
+     *
      * @Groups({"user:read"})
      */
     private $comments;
@@ -109,10 +108,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="integer", nullable=true)
-     * 
+     *
      * @Groups({"user:read", "user:write", "article:read"})
      */
     private $karma;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Favorite::class, mappedBy="user", orphanRemoval=true)
+     *
+     * @Groups({"user:read", "article:read"})
+     */
+    private $favorites;
 
 
 
@@ -123,6 +129,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->articles = new ArrayCollection();
         $this->votes = new ArrayCollection();
         $this->article = new ArrayCollection();
+        $this->favorites = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -211,7 +218,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials()
     {
         // If you store any temporary, sensitive data on the user, clear it here
-         $this->plainPassword = null;
+        $this->plainPassword = null;
     }
 
     public function setUsername(string $username): self
@@ -362,7 +369,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * @return Collection|Favorite[]
+     */
+    public function getFavorites(): Collection
+    {
+        return $this->favorites;
+    }
 
+    public function addFavorite(Favorite $favorite): self
+    {
+        if (!$this->favorites->contains($favorite)) {
+            $this->favorites[] = $favorite;
+            $favorite->setUser($this);
+        }
 
+        return $this;
+    }
 
+    public function removeFavorite(Favorite $favorite): self
+    {
+        if ($this->favorites->removeElement($favorite)) {
+            // set the owning side to null (unless already changed)
+            if ($favorite->getUser() === $this) {
+                $favorite->setUser(null);
+            }
+        }
+
+        return $this;
+    }
 }

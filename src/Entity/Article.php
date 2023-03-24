@@ -2,25 +2,29 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\ArticleRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use Assert\NotBlank;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
+use App\Repository\ArticleRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use App\Controller\ArticlePictureController;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\HttpFoundation\File\File;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Symfony\Component\Validator\Constraints as Assert;
- 
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 
 /**
  * @ApiResource(
+ *  attributes={"order"={"id": "DESC"}},
  *  normalizationContext={"groups"={"article:read"}},
  *  denormalizationContext={"groups"={"article:write"}},
  *  collectionOperations={
- *      "post"={},
  *      "get"={},
+ *      "post"={},
  *      },
  *   itemOperations={
  *      "put"={},
@@ -33,8 +37,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  *          "controller" = App\Controller\ArticlePictureController::class
  *      },
  *      }
- * 
+ *
  * )
+ * @ApiFilter(SearchFilter::class, properties={"favorites.user.id": "exact", })
  * @ORM\Entity(repositoryClass=ArticleRepository::class)
  * @Vich\Uploadable()
  */
@@ -47,50 +52,50 @@ class Article
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * 
-     * @Groups("article:read")
+     *
+     * @Groups("article:read", "favorite:read")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * 
+     * @Assert\NotBlank(message="Le titre est obligatoire.")
      * @Groups({"article:read", "article:write"})
      */
     private $title;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * 
+     *
      * @Groups("article:read")
-     * 
+     *
      */
     private $slug;
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * 
+     * @Assert\NotBlank(message="Le contenu est obligatoire.")
      * @Groups({"article:read", "article:write"})
      */
     private $content;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * 
+     *
      * @Groups("article:read")
      */
     private $picture;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * 
+     *
      * @Groups("article:read")
      */
     private $pictureUrl;
 
 
 
-        /**
+    /**
      * NOTE: This is not a mapped field of entity metadata, just a simple property.
      *
      * @Vich\UploadableField(mapping="article_image", fileNameProperty="picture")
@@ -101,21 +106,21 @@ class Article
 
     /**
      * @ORM\Column(type="boolean")
-     * 
+     *
      * @Groups("article:read")
      */
     private $isPublished;
 
     /**
      * @ORM\Column(type="datetime_immutable", nullable=true)
-     * 
+     *
      * @Groups("article:read")
      */
     private $publishedAt;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
-     * 
+     *
      * @Groups("article:read")
      */
     private $updatedAt;
@@ -131,28 +136,28 @@ class Article
     /**
      * @ORM\OneToMany(targetEntity=Comment::class, mappedBy="article", orphanRemoval=true)
      * @ApiSubresource
-     * 
+     *
      * @Groups("article:read")
      */
     private $comments;
 
     /**
      * @ORM\ManyToMany(targetEntity=Tag::class, inversedBy="articles")
-     * 
+     * @Assert\Count(min = "1", minMessage="Sélectionnez au moins une catégorie.")
      * @Groups({"article:read", "article:write"})
      */
     private $tags;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="articles")
-     * 
+     * @Assert\NotBlank(message="L'utilisateur n'est pas défini.")
      * @Groups({"article:read", "article:write"})
      */
     private $author;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
-     * 
+     *
      * @Groups({"article:read", "article:write"})
      */
     private $score;
@@ -164,6 +169,13 @@ class Article
      */
     private $votes;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Favorite::class, mappedBy="article")
+     *
+     * @Groups({"article:read", "article:write"})
+     */
+    private $favorites;
+
 
 
     public function __construct()
@@ -174,6 +186,7 @@ class Article
         $this->comments = new ArrayCollection();
         $this->tags = new ArrayCollection();
         $this->votes = new ArrayCollection();
+        $this->favorites = new ArrayCollection();
     }
 
 
@@ -422,9 +435,33 @@ class Article
         return $this;
     }
 
+    /**
+     * @return Collection|Favorite[]
+     */
+    public function getFavorites(): Collection
+    {
+        return $this->favorites;
+    }
 
+    public function addFavorite(Favorite $favorite): self
+    {
+        if (!$this->favorites->contains($favorite)) {
+            $this->favorites[] = $favorite;
+            $favorite->setArticle($this);
+        }
 
+        return $this;
+    }
 
+    public function removeFavorite(Favorite $favorite): self
+    {
+        if ($this->favorites->removeElement($favorite)) {
+            // set the owning side to null (unless already changed)
+            if ($favorite->getArticle() === $this) {
+                $favorite->setArticle(null);
+            }
+        }
 
-
+        return $this;
+    }
 }

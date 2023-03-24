@@ -1,55 +1,68 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"
 
-import ArticleList from "../common/ArticleList";
-import { getTagArticles, getTagWithLabel } from "../services/tagsAPI";
+import ArticleList from "../common/ArticleList"
+import { getTagArticles, getTagWithLabel } from "../services/tagsAPI"
 
 const TagArticles = (props) => {
-  const [articles, setArticles] = useState([]);
-  const [tag, setTag] = useState([]);
+    const [articles, setArticles] = useState([])
+    const [tag, setTag] = useState([])
 
-  const [loaded, setLoaded] = useState(false);
+    const [loaded, setLoaded] = useState(false)
 
-  useEffect(() => {
-    fetchArticles();
-  }, [tag]);
+    const { user } = props
 
-  useEffect(() => {
-    fetchTag();
-  }, []);
+    useEffect(() => {
+        fetchArticles(1)
+    }, [tag])
 
-  const { user } = props;
+    useEffect(() => {
+        fetchTag()
+    }, [])
 
-  const fetchTag = async () => {
-    try {
-      setTag(await getTagWithLabel(props.match.params.label));
+    const fetchTag = async () => {
+        try {
+            setTag(await getTagWithLabel(props.match.params.label))
 
-      setLoaded(true);
-    } catch (error) {
-      console.log(error);
+            setLoaded(true)
+        } catch (error) {
+            console.log(error)
+        }
     }
-  };
-  const fetchArticles = async () => {
-    setArticles(await getTagArticles(tag.id));
-  };
 
-  const setArticlesChild = (data) => {
-    setArticles(data);
-  };
+    const fetchArticles = async (pageNumber) => {
+        try {
+            const formatArray = [...articles].concat(
+                await getTagArticles(tag.id, pageNumber)
+            )
+            if (formatArray.length === articles.length) {
+                setScrolled(true)
+            }
+            setArticles(formatArray)
+            setLoaded(true)
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
-  return (
-    <React.Fragment>
-      <h1 className="text-center">
-        <i className="fa fa-fw fa-tags" aria-hidden="true"></i>Catégorie{" "}
-        {props.match.params.label}
-      </h1>
-      <ArticleList
-        articles={articles}
-        setArticlesChild={setArticlesChild}
-        user={user}
-        loaded={loaded}
-      />
-    </React.Fragment>
-  );
-};
+    const setArticlesChild = (data) => {
+        setArticles(data)
+    }
 
-export default TagArticles;
+    return (
+        <React.Fragment>
+            <h1 className="text-center">
+                <i className="fa fa-fw fa-tags" aria-hidden="true"></i>Catégorie{" "}
+                {props.match.params.label}
+            </h1>
+            <ArticleList
+                articles={articles}
+                setArticles={setArticlesChild}
+                user={user}
+                fetchArticles={fetchArticles}
+                loaded={loaded}
+            />
+        </React.Fragment>
+    )
+}
+
+export default TagArticles

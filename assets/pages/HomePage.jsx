@@ -1,62 +1,72 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"
 
-import { Link } from "react-router-dom";
-import ArticleList from "../common/ArticleList";
+import { Link } from "react-router-dom"
+import ArticleList from "../common/ArticleList"
 import {
-  getArticles,
-  deleteArticle,
-  updateArticle,
-} from "../services/articleAPI";
+    getArticles,
+    deleteArticle,
+    updateArticle,
+} from "../services/articleAPI"
 
-import { newVote, updateVote } from "../services/voteAPI";
-import { getArticleVotes } from "../services/userAPI";
-import { toast } from "react-toastify";
-import { ArrowUp, CaretUpFill } from "react-bootstrap-icons";
+import { newVote, updateVote } from "../services/voteAPI"
+import { getArticleVotes } from "../services/userAPI"
+import { toast } from "react-toastify"
+import { ArrowUp, CaretUpFill } from "react-bootstrap-icons"
+import SearchBar from "../common/SearchBar"
+import { handleScroll } from "../scripts/scroll"
+import { newFavorite } from "../services/favoriteAPI"
 
 const HomePage = (props) => {
-  const [articles, setArticles] = useState([]);
-  const [score, setScore] = useState(0);
+    const [articles, setArticles] = useState([])
+    const [score, setScore] = useState(0)
+    const [loaded, setLoaded] = useState(false)
+    const [test, setTest] = useState("")
 
-  const [loaded, setLoaded] = useState(false);
+    const { user } = props
 
-  useEffect(() => {
-    fetchArticle();
-  }, []);
-
-  const { user } = props;
-
-  const fetchArticle = async () => {
-    try {
-      setArticles(await getArticles());
-      setLoaded(true);
-    } catch (error) {
-      console.log(error);
+    const setArticlesChild = (data) => {
+        setArticles(data)
     }
-  };
 
-  const setArticlesChild = (data) => {
-    setArticles(data);
-  };
+    const fetchArticles = async (pageNumber) => {
+        try {
+            const formatArray = [...articles].concat(
+                await getArticles(pageNumber)
+            )
+            if (formatArray.length === articles.length) {
+                setScrolled(true)
+            }
+            setArticles(formatArray)
+            setLoaded(true)
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
-  return (
-    <React.Fragment>
-      <h1>Home</h1>
-      <p>{user.username ? <span>connecté</span> : "Déconnecté"}</p>
-      <div className="row article-add my-4 text-center">
-        <div className="col-lg-12">
-          <Link to={`/articles/new`} className="btn btn-primary">
-            <i className="fa fa-plus"></i> Ajouter une publication
-          </Link>
-        </div>
-      </div>
-      <ArticleList
-        articles={articles}
-        setArticlesChild={setArticlesChild}
-        user={user}
-        loaded={loaded}
-      />
-    </React.Fragment>
-  );
-};
+    return (
+        <React.Fragment>
+            <div id="articles">
+                <div className="text-center">
+                    <h1>Accueil</h1>
+                </div>
+                <div className="row article-add my-4 text-center">
+                    <div className="col-lg-12">
+                        <Link to={`/articles/new`} className="btn btn-primary">
+                            <i className="fa fa-plus"></i> Ajouter une
+                            publication
+                        </Link>
+                    </div>
+                </div>
+                <ArticleList
+                    user={user}
+                    setArticles={setArticlesChild}
+                    articles={articles}
+                    fetchArticles={fetchArticles}
+                    loaded={loaded}
+                />
+            </div>
+        </React.Fragment>
+    )
+}
 
-export default HomePage;
+export default HomePage
