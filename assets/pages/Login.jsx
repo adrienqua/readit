@@ -24,7 +24,7 @@ const Login = (props) => {
             console.log(error.response)
         }
 
-        //window.location = "/"
+        window.location = "/"
     }
 
     const responseGoogle = (response) => {
@@ -41,7 +41,7 @@ const Login = (props) => {
                         label="Pseudo* :"
                         handleChange={(e) => handleChange(e)}
                         value={user.username}
-                        //required
+                        required
                     />
                     <Input
                         name="password"
@@ -49,7 +49,7 @@ const Login = (props) => {
                         type="password"
                         handleChange={(e) => handleChange(e)}
                         value={user.password}
-                        //required
+                        required
                     />
 
                     <input
