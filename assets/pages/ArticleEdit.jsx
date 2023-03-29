@@ -51,16 +51,14 @@ const ArticleEdit = ({ id, submitRef, setArticles, articles }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        article.author = article.author["@id"].slice(1)
 
-        const originalArticles = articles
+        const originalArticles = [...articles]
         const index = originalArticles.findIndex((art) => art.id === article.id)
         originalArticles[index] = article
         setArticles(originalArticles)
-        console.log("og", originalArticles)
-
         try {
-            await updateArticle(id, article)
+            originalArticles.author = originalArticles.author["@id"].slice(1)
+            await updateArticle(id, originalArticles)
         } catch (error) {
             console.log(error)
         }
@@ -69,9 +67,9 @@ const ArticleEdit = ({ id, submitRef, setArticles, articles }) => {
             const fileData = new FormData()
             fileData.append("file", article.file[0])
             await newArticlePicture(id, fileData)
+            window.location = "/"
         }
         //history.push("/")
-        //window.location = "/"
         toast.success("Publication modifiée.")
     }
 
@@ -86,11 +84,6 @@ const ArticleEdit = ({ id, submitRef, setArticles, articles }) => {
 
     return (
         <React.Fragment>
-            {/*             <h1>
-                <i className="fa fa-fw fa-pencil" aria-hidden="true"></i>Editer
-                la publication {id}
-            </h1> */}
-
             <form className="mt-4">
                 <Input
                     name="title"

@@ -19,11 +19,12 @@ const ArticleListItem = (props) => {
 
     const [liked, setLiked] = useState(false)
 
-    const user = useContext(AuthContext)
+    const [user, setUser] = useContext(AuthContext)
 
     const editFormRef = useRef(null)
 
     useEffect(() => {
+        //check if the user has liked an article
         const findFavorites = user?.favorites?.some(
             (fav) => article.favorites.indexOf(fav) >= 0
         )

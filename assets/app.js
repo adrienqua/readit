@@ -62,7 +62,7 @@ const App = () => {
     }
     return (
         <HashRouter>
-            <AuthContext.Provider value={user}>
+            <AuthContext.Provider value={[user, setUser]}>
                 <Navbar user={user} />
                 <ToastContainer
                     position="top-right"

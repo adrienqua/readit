@@ -103,6 +103,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @ORM\OneToMany(targetEntity=Vote::class, mappedBy="user", orphanRemoval=true)
      * @ApiSubresource
+     *
+     * @Groups({"user:read"})
      */
     private $votes;
 
