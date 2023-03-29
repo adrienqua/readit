@@ -116,7 +116,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @ORM\OneToMany(targetEntity=Favorite::class, mappedBy="user", orphanRemoval=true)
      *
-     * @Groups({"user:read", "article:read"})
+     * @Groups({"user:read"})
      */
     private $favorites;
 

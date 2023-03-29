@@ -15,22 +15,20 @@ const ArticleListItem = (props) => {
         handleDelete,
         handleLike,
         articleKey,
-        user,
     } = props
 
     const [liked, setLiked] = useState(false)
 
-    //const user = useContext(AuthContext)
+    const user = useContext(AuthContext)
 
     const editFormRef = useRef(null)
 
     useEffect(() => {
-        console.log("user ", user)
-        const findFavorites = article.author.favorites.some(
+        const findFavorites = user?.favorites?.some(
             (fav) => article.favorites.indexOf(fav) >= 0
         )
         setLiked(findFavorites)
-    }, [articles])
+    }, [articles, user])
 
     return (
         <div className={`mb-1 g-0  row article-item item-${article.id}`}>

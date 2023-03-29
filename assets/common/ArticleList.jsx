@@ -242,14 +242,12 @@ const ArticleList = (props) => {
                     newArticles[key]["favorites"].push(
                         `/api/favorites/${newFavorite}`
                     )
-                    newArticles[key]["author"]["favorites"].push(
-                        `/api/favorites/${newFavorite}`
-                    )
+                    user["favorites"].push(`/api/favorites/${newFavorite}`)
                     setArticles(newArticles)
                 })
             }
             if (like === "dislike") {
-                const filterArray = data.author.favorites.filter((fav) =>
+                const filterArray = user.favorites.filter((fav) =>
                     data.favorites.includes(fav)
                 )
                 const indexOf = data.favorites.indexOf(filterArray.toString())
@@ -289,7 +287,6 @@ const ArticleList = (props) => {
                             handleDelete={handleDelete}
                             key={article.id}
                             articleKey={key}
-                            user={user}
                             handleLike={handleLike}
                         />
                     ))}
