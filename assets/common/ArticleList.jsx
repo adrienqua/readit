@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useContext } from "react"
 import { Link } from "react-router-dom"
 import Score from "../common/Score"
 import {
@@ -12,6 +12,7 @@ import { toast } from "react-toastify"
 import ArticleListItem from "./ArticleListItem"
 import { newFavorite } from "../services/favoriteAPI"
 import SearchBar from "./SearchBar"
+import { AuthContext } from "./../contexts/authContext"
 
 const ArticleList = (props) => {
     const [addVote, setAddVote] = useState()
@@ -24,15 +25,9 @@ const ArticleList = (props) => {
     const [scrolled, setScrolled] = useState(false)
     const [page, setPage] = useState(1)
 
-    const { user, setArticles, articles, fetchArticles, loaded } = props
+    const [user, setUser] = useContext(AuthContext)
 
-    useEffect(() => {
-        if (addVote) {
-            addNewVote()
-            fetchArticle()
-            console.log("ue addvote")
-        }
-    }, [addVote])
+    const { setArticles, articles, fetchArticles, loaded } = props
 
     useEffect(() => {
         fetchArticles(page)
@@ -79,21 +74,29 @@ const ArticleList = (props) => {
         if (!user.username) {
             props.history.push("/login")
         }
+
+        //check if the user got a vote from this article
+        const findScore = user?.votes?.some(
+            (vote) => item.votes.map((v) => v["@id"]).indexOf(vote) >= 0
+        )
+
         const datas = [...articles]
         const index = datas.indexOf(item)
         datas[index] = { ...datas[index] }
         const data = datas[index]
 
-        if (!item.votes[0]) {
+        if (!findScore) {
+            console.log("New vote !")
             handleNewScore(item, action, data, datas)
-            handleSubmitNewScore(item, data, datas)
+            console.log("user ue", user, item, findScore)
         } else {
+            console.log("update vote !")
             handleScore(item, action, data)
             handleSubmitScore(item, data, datas)
         }
     }
 
-    const handleNewScore = (item, action, data) => {
+    const handleNewScore = async (item, action, data, datas) => {
         if (action === "-") {
             var down = true
             var up = false
@@ -107,28 +110,48 @@ const ArticleList = (props) => {
         }
 
         //Reformat
-        const userId = user["@id"].slice(1)
+        const userId = user["@id"]
         const articleId = item["@id"].slice(1)
-
-        setAddVote({
-            user: userId,
-            article: articleId,
-            isDown: down,
-            isUp: up,
-        })
-        console.log(addVote)
-    }
-
-    const handleSubmitNewScore = async (item, data, datas) => {
-        //Reformat
         const author = data.author
-        data.author = data.author["@id"].slice(1)
         console.log(data)
 
         //Submit
-        setArticles(datas)
         try {
-            await updateArticle(data.id, data)
+            await newVote({
+                user: userId,
+                article: articleId,
+                isDown: down,
+                isUp: up,
+            }).then((response) => {
+                //setUser
+                const newVoteId = response.data.id
+                const userNewVotes = [...user.votes]
+                userNewVotes.push(`/api/votes/${newVoteId}`)
+                setUser((prevState) => ({
+                    ...prevState,
+                    votes: userNewVotes,
+                }))
+                if (user.id === data.author.id) {
+                    setUser((prevState) => ({
+                        ...prevState,
+                        karma: data.author.karma,
+                    }))
+                }
+
+                //setArticles
+                const newVote = {
+                    ["@id"]: `/api/votes/${newVoteId}`,
+                    id: newVoteId,
+                    isUp: response.data.isUp,
+                    isDown: response.data.isDown,
+                    user: {
+                        ["@id"]: userId,
+                    },
+                }
+                data.votes.push(newVote)
+                setArticles(datas)
+            })
+            await updateArticle(data.id, { score: data.score })
             await updateUser(author.id, {
                 karma: author.karma,
             })
@@ -180,6 +203,12 @@ const ArticleList = (props) => {
         //Submit
         console.log("submit datas", datas)
         setArticles(datas)
+        if (user.id === data.author.id) {
+            setUser((prevState) => ({
+                ...prevState,
+                karma: data.author.karma,
+            }))
+        }
 
         console.log("votes", voteData)
         try {
@@ -209,7 +238,6 @@ const ArticleList = (props) => {
             setSearchResult(articles)
         }
     }
-    //searchQuery.length < 1 ? articles : searchResult
 
     const handleScroll = () => {
         const handleScrollEvent = () => {
@@ -232,6 +260,7 @@ const ArticleList = (props) => {
     const handleLike = async (id, like, key, data) => {
         try {
             const newArticles = [...articles]
+            const newUserFavorite = [...user.favorites]
             if (like === "like") {
                 await newFavorite({
                     isActive: true,
@@ -242,8 +271,9 @@ const ArticleList = (props) => {
                     newArticles[key]["favorites"].push(
                         `/api/favorites/${newFavorite}`
                     )
-                    user["favorites"].push(`/api/favorites/${newFavorite}`)
+                    newUserFavorite.push(`/api/favorites/${newFavorite}`)
                     setArticles(newArticles)
+                    setUser({ ...user, favorites: newUserFavorite })
                 })
             }
             if (like === "dislike") {
@@ -253,6 +283,7 @@ const ArticleList = (props) => {
                 const indexOf = data.favorites.indexOf(filterArray.toString())
                 data.favorites.splice(0, 1)
                 console.log(indexOf, data.favorites)
+
                 await updateArticle(id, {
                     favorites: data.favorites,
                 })
