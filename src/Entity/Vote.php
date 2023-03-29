@@ -41,7 +41,7 @@ class Vote
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="votes")
-     * 
+     *
      * @Groups({"vote:read", "vote:write", "article:read"})
      */
     private $user;
@@ -58,7 +58,6 @@ class Vote
     {
         $this->isUp = false;
         $this->isDown = false;
-
     }
 
 

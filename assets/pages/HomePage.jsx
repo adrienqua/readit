@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useContext } from "react"
 
 import { Link } from "react-router-dom"
 import ArticleList from "../common/ArticleList"
@@ -15,14 +15,15 @@ import { ArrowUp, CaretUpFill } from "react-bootstrap-icons"
 import SearchBar from "../common/SearchBar"
 import { handleScroll } from "../scripts/scroll"
 import { newFavorite } from "../services/favoriteAPI"
+import { AuthContext } from "./../contexts/authContext"
 
-const HomePage = (props) => {
+const HomePage = ({ user }) => {
     const [articles, setArticles] = useState([])
     const [score, setScore] = useState(0)
     const [loaded, setLoaded] = useState(false)
     const [test, setTest] = useState("")
 
-    const { user } = props
+    //const user = useContext(AuthContext)
 
     const setArticlesChild = (data) => {
         setArticles(data)

@@ -284,12 +284,13 @@ const ArticleList = (props) => {
                         <ArticleListItem
                             articles={articles}
                             article={article}
+                            setArticles={setArticles}
                             updateScore={updateScore}
                             handleDelete={handleDelete}
                             key={article.id}
                             articleKey={key}
                             user={user}
-                            onLike={handleLike}
+                            handleLike={handleLike}
                         />
                     ))}
                 </div>

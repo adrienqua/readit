@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
+import React, { useState, useEffect, useRef } from "react"
+import { Link, useHistory } from "react-router-dom"
 import {
     getArticle,
     updateArticle,
@@ -10,7 +10,7 @@ import Input from "../common/Input"
 import { ToastContainer, toast } from "react-toastify"
 import { Multiselect } from "multiselect-react-dropdown"
 
-const ArticleEdit = (props) => {
+const ArticleEdit = ({ id, submitRef, setArticles, articles }) => {
     const [tags, setTags] = useState([])
     const [article, setArticle] = useState({
         title: "",
@@ -22,6 +22,7 @@ const ArticleEdit = (props) => {
             },
         ],
     })
+    let history = useHistory()
 
     useEffect(() => {
         fetchArticle()
@@ -30,7 +31,7 @@ const ArticleEdit = (props) => {
 
     const fetchArticle = async () => {
         try {
-            setArticle(await getArticle(props.match.params.id))
+            setArticle(await getArticle(id))
         } catch (error) {
             console.log(error)
         }
@@ -51,8 +52,15 @@ const ArticleEdit = (props) => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         article.author = article.author["@id"].slice(1)
+
+        const originalArticles = articles
+        const index = originalArticles.findIndex((art) => art.id === article.id)
+        originalArticles[index] = article
+        setArticles(originalArticles)
+        console.log("og", originalArticles)
+
         try {
-            await updateArticle(props.match.params.id, article)
+            await updateArticle(id, article)
         } catch (error) {
             console.log(error)
         }
@@ -60,9 +68,10 @@ const ArticleEdit = (props) => {
         if (article.file) {
             const fileData = new FormData()
             fileData.append("file", article.file[0])
-            await newArticlePicture(props.match.params.id, fileData)
+            await newArticlePicture(id, fileData)
         }
-        props.history.push("/")
+        //history.push("/")
+        //window.location = "/"
         toast.success("Publication modifiée.")
     }
 
@@ -77,12 +86,12 @@ const ArticleEdit = (props) => {
 
     return (
         <React.Fragment>
-            <h1>
+            {/*             <h1>
                 <i className="fa fa-fw fa-pencil" aria-hidden="true"></i>Editer
-                la publication {props.match.params.id}
-            </h1>
+                la publication {id}
+            </h1> */}
 
-            <form onSubmit={handleSubmit} className="mt-4">
+            <form className="mt-4">
                 <Input
                     name="title"
                     label="Titre"
@@ -131,9 +140,11 @@ const ArticleEdit = (props) => {
         </div> */}
 
                 <input
-                    className="btn btn-primary mt-1"
+                    className="btn btn-primary mt-1 d-none"
                     type="submit"
                     value="Editer"
+                    ref={submitRef}
+                    onClick={handleSubmit}
                 />
             </form>
         </React.Fragment>

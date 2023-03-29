@@ -1,21 +1,31 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef, useContext } from "react"
 import { Link } from "react-router-dom"
 import Score from "../common/Score"
 import Modal from "./Modal"
+import Like from "./Like"
+import ArticleEdit from "./../pages/ArticleEdit"
+import { AuthContext } from "./../contexts/authContext"
 
 const ArticleListItem = (props) => {
     const {
         article,
         articles,
+        setArticles,
         updateScore,
         handleDelete,
-        user,
-        onLike,
+        handleLike,
         articleKey,
+        user,
     } = props
+
     const [liked, setLiked] = useState(false)
 
+    //const user = useContext(AuthContext)
+
+    const editFormRef = useRef(null)
+
     useEffect(() => {
+        console.log("user ", user)
         const findFavorites = article.author.favorites.some(
             (fav) => article.favorites.indexOf(fav) >= 0
         )
@@ -74,57 +84,65 @@ const ArticleListItem = (props) => {
                             </small>
                         </span>
                     </Link>
-                    <button className="article-like btn btn-sm btn-light mx-1">
-                        <i
-                            className={liked ? "fa fa-heart" : "fa fa-heart-o"}
-                            onClick={
-                                liked
-                                    ? () =>
-                                          onLike(
-                                              article.id,
-                                              "dislike",
-                                              articleKey,
-                                              article
-                                          )
-                                    : () =>
-                                          onLike(
-                                              article.id,
-                                              "like",
-                                              articleKey,
-                                              article
-                                          )
-                            }
-                            aria-hidden="true"
-                        ></i>
-                    </button>
+                    <Like
+                        onLike={handleLike}
+                        liked={liked}
+                        articleKey={articleKey}
+                        article={article}
+                    />
                     {user.id === article.author.id && (
                         <>
-                            <Link to={`/articles/${article.id}/edit`}>
+                            {/*                             <Link to={`/articles/${article.id}/edit`}>
                                 <button className="btn btn-sm btn-light mx-1">
                                     <i
                                         className="fa fa-pencil"
                                         aria-hidden="true"
                                     ></i>
                                 </button>
-                            </Link>
+                            </Link> */}
                             <button
                                 className="btn btn-sm btn-light mx-1"
                                 data-bs-toggle="modal"
-                                data-bs-target={`#confirmationModal${article.id}`}
+                                data-bs-target={`#editArticleModal${article.id}`}
+                            >
+                                <i
+                                    className="fa fa-pencil"
+                                    aria-hidden="true"
+                                ></i>
+                            </button>
+                            <button
+                                className="btn btn-sm btn-light mx-1"
+                                data-bs-toggle="modal"
+                                data-bs-target={`#deleteArticleModal${article.id}`}
                             >
                                 <i
                                     className="fa fa-trash-o"
                                     aria-hidden="true"
                                 ></i>
                             </button>
+                            <Modal
+                                id={`editArticleModal${article.id}`}
+                                handleSubmit={() => editFormRef.current.click()}
+                                action="Editer"
+                                title={`Editer l'article ${article.id}`}
+                                content={
+                                    <ArticleEdit
+                                        id={article.id}
+                                        submitRef={editFormRef}
+                                        setArticles={setArticles}
+                                        articles={articles}
+                                    />
+                                }
+                            />
+                            <Modal
+                                id={`deleteArticleModal${article.id}`}
+                                handleSubmit={() => handleDelete(article)}
+                                action="Supprimer"
+                                title="Supprimer l'article."
+                                content="Voulez vous vraiment supprimer votre article ?"
+                            />
                         </>
                     )}
-                    <Modal
-                        id={article.id}
-                        handleDelete={() => handleDelete(article)}
-                        title="Supprimer l'article."
-                        content="Voulez vous vraiment supprimer votre article ?"
-                    />
                 </div>
             </div>
         </div>

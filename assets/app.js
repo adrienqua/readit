@@ -11,7 +11,7 @@ import "font-awesome/css/font-awesome.css"
 import "./css/bootstrap.min.css"
 import "react-toastify/dist/ReactToastify.css"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, createContext } from "react"
 import ReactDOM from "react-dom"
 import { Link } from "react-router-dom"
 import jwtDecode from "jwt-decode"
@@ -35,6 +35,7 @@ import NotFound from "./pages/NotFound"
 import About from "./pages/About"
 import Test from "./pages/Test"
 import UserFavorites from "./pages/UserFavorites"
+import { AuthContext } from "./contexts/authContext"
 
 const App = () => {
     const [user, setUser] = useState([])
@@ -49,7 +50,7 @@ const App = () => {
             const jwt = localStorage.getItem("token")
             const user = jwtDecode(jwt)
             console.log(user)
-            setUser(user)
+            //setUser(user)
             setUser(await getUserWithUsername(user.username))
         } catch (error) {
             console.log("user", error)
@@ -61,90 +62,94 @@ const App = () => {
     }
     return (
         <HashRouter>
-            <Navbar user={user} />
-            <ToastContainer
-                position="top-right"
-                autoClose={5000}
-                theme="dark"
-            />
-            <div className="container page-content pt-5">
-                <Switch>
-                    <PrivateRoute
-                        path="/articles/:id/edit"
-                        exact
-                        component={ArticleEdit}
-                    />
-                    <PrivateRoute
-                        path="/articles/new"
-                        exact
-                        component={ArticleNew}
-                        user={user}
-                    />
-                    <Route
-                        path="/article/:id"
-                        exact
-                        render={(props) => (
-                            <ArticleDetail {...props} user={user} />
-                        )}
-                    />
-                    <Route
-                        path="/tag/:label"
-                        exact
-                        render={(props) => (
-                            <TagArticles {...props} user={user} />
-                        )}
-                    />
-                    <Route
-                        path="/user/:username/favorites"
-                        exact
-                        render={(props) => (
-                            <UserFavorites {...props} user={user} />
-                        )}
-                    />
-                    <Route
-                        path="/user/:username/articles"
-                        exact
-                        render={(props) => (
-                            <UserArticles {...props} user={user} />
-                        )}
-                    />
-                    <Route
-                        path="/test"
-                        exact
-                        render={(props) => <Test {...props} user={user} />}
-                    />
-                    <Route
-                        path="/profile"
-                        exact
-                        render={(props) => (
-                            <UserSettings
-                                {...props}
-                                user={user}
-                                setUser={setUserChild}
-                            />
-                        )}
-                    />
-                    <Route
-                        path="/login"
-                        exact
-                        render={(props) => <Login {...props} />}
-                    />
-                    <Route
-                        path="/register"
-                        exact
-                        render={(props) => <Register {...props} />}
-                    />
-                    <Route path="/about" exact component={About} />
-                    <Route
-                        path="/"
-                        exact
-                        render={(props) => <HomePage {...props} user={user} />}
-                    />
-                    <Route path="/not-found" component={NotFound} />
-                    <Redirect to="/not-found" />
-                </Switch>
-            </div>
-            <Footer />
+            <AuthContext.Provider value={user}>
+                <Navbar user={user} />
+                <ToastContainer
+                    position="top-right"
+                    autoClose={5000}
+                    theme="dark"
+                />
+                <div className="container page-content pt-5">
+                    <Switch>
+                        <PrivateRoute
+                            path="/articles/:id/edit"
+                            exact
+                            component={ArticleEdit}
+                        />
+                        <PrivateRoute
+                            path="/articles/new"
+                            exact
+                            component={ArticleNew}
+                            user={user}
+                        />
+                        <Route
+                            path="/article/:id"
+                            exact
+                            render={(props) => (
+                                <ArticleDetail {...props} user={user} />
+                            )}
+                        />
+                        <Route
+                            path="/tag/:label"
+                            exact
+                            render={(props) => (
+                                <TagArticles {...props} user={user} />
+                            )}
+                        />
+                        <Route
+                            path="/user/:username/favorites"
+                            exact
+                            render={(props) => (
+                                <UserFavorites {...props} user={user} />
+                            )}
+                        />
+                        <Route
+                            path="/user/:username/articles"
+                            exact
+                            render={(props) => (
+                                <UserArticles {...props} user={user} />
+                            )}
+                        />
+                        <Route
+                            path="/test"
+                            exact
+                            render={(props) => <Test {...props} user={user} />}
+                        />
+                        <Route
+                            path="/profile"
+                            exact
+                            render={(props) => (
+                                <UserSettings
+                                    {...props}
+                                    user={user}
+                                    setUser={setUserChild}
+                                />
+                            )}
+                        />
+                        <Route
+                            path="/login"
+                            exact
+                            render={(props) => <Login {...props} />}
+                        />
+                        <Route
+                            path="/register"
+                            exact
+                            render={(props) => <Register {...props} />}
+                        />
+                        <Route path="/about" exact component={About} />
+                        <Route
+                            path="/"
+                            exact
+                            render={(props) => (
+                                <HomePage {...props} user={user} />
+                            )}
+                        />
+                        <Route path="/not-found" component={NotFound} />
+                        <Redirect to="/not-found" />
+                    </Switch>
+                </div>
+                <Footer />
+            </AuthContext.Provider>
         </HashRouter>
     )
 }

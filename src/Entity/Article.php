@@ -170,7 +170,7 @@ class Article
     private $votes;
 
     /**
-     * @ORM\OneToMany(targetEntity=Favorite::class, mappedBy="article")
+     * @ORM\OneToMany(targetEntity=Favorite::class, mappedBy="article", orphanRemoval=true)
      *
      * @Groups({"article:read", "article:write"})
      */
