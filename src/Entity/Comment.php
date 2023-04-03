@@ -4,6 +4,9 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CommentRepository;
+use ApiPlatform\Core\Annotation\ApiSubresource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -21,7 +24,7 @@ class Comment
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * 
+     *
      * @Groups({"comment:read", "article:read"})
      */
     private $id;
@@ -29,21 +32,21 @@ class Comment
 
     /**
      * @ORM\Column(type="text")
-     * 
+     *
      * @Groups({"comment:read", "comment:write", "article:read"})
      */
     private $content;
 
     /**
      * @ORM\Column(type="datetime_immutable")
-     * 
+     *
      * @Groups({"comment:read", "article:read"})
      */
     private $createdAt;
 
     /**
      * @ORM\ManyToOne(targetEntity=Article::class, inversedBy="comments")
-     * 
+     *
      * @Groups("comment:write")
      */
     private $article;
@@ -51,10 +54,24 @@ class Comment
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="comments")
      * @ORM\JoinColumn(nullable=false)
-     * 
+     *
      * @Groups({"comment:read", "comment:write"})
      */
     private $author;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Vote::class, mappedBy="comment", orphanRemoval=true)
+     * @ApiSubresource
+     * @Groups({"comment:read", "comment:write"})
+     */
+    private $votes;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     *
+     * @Groups({"comment:read", "comment:write"})
+     */
+    private $score;
 
 
 
@@ -63,6 +80,8 @@ class Comment
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->votes = new ArrayCollection();
+        $this->score = 0;
     }
 
 
@@ -120,7 +139,45 @@ class Comment
         return $this;
     }
 
+    /**
+     * @return Collection|Vote[]
+     */
+    public function getVotes(): Collection
+    {
+        return $this->votes;
+    }
 
+    public function addVote(Vote $vote): self
+    {
+        if (!$this->votes->contains($vote)) {
+            $this->votes[] = $vote;
+            $vote->setComment($this);
+        }
 
+        return $this;
+    }
 
+    public function removeVote(Vote $vote): self
+    {
+        if ($this->votes->removeElement($vote)) {
+            // set the owning side to null (unless already changed)
+            if ($vote->getComment() === $this) {
+                $vote->setComment(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getScore(): ?int
+    {
+        return $this->score;
+    }
+
+    public function setScore(?int $score): self
+    {
+        $this->score = $score;
+
+        return $this;
+    }
 }

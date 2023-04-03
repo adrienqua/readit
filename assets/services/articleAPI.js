@@ -8,12 +8,11 @@ const apiEndpoint = apiUrl + "articles"
 export function getArticles(page) {
     return axios.get(apiEndpoint + "?page=" + page).then((response) => {
         const data = response.data["hydra:member"]
-        /*     const filter = data[4].votes.filter((a) => a.user.id == 1); */
         const user = getCurrentUser()
         data.map((item) => {
             if (user) {
                 const filtered = item.votes.filter(
-                    (a) => a.user.username == user.username
+                    (a) => a.user?.username == user.username
                 )
                 item.votes = filtered
             } else {
@@ -26,7 +25,21 @@ export function getArticles(page) {
 }
 
 export function getArticle(id) {
-    return axios.get(apiEndpoint + "/" + id).then((response) => response.data)
+    return axios.get(apiEndpoint + "/" + id).then((response) => {
+        const data = response.data
+        const user = getCurrentUser()
+        data.comments.map((item) => {
+            if (user) {
+                const filtered = item.votes?.filter(
+                    (a) => a.user?.username == user.username
+                )
+                item.votes = filtered
+            } else {
+                item.votes = []
+            }
+        })
+        return data
+    })
 }
 
 export function updateArticle(id, component) {

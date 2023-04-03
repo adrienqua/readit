@@ -32,9 +32,9 @@ const ArticleListItem = (props) => {
     }, [articles, user])
 
     return (
-        <div className={`mb-1 g-0  row article-item item-${article.id}`}>
+        <div className={`mb-1 g-0 article-item item-${article.id}`}>
             <Score data={article} updateScore={updateScore} />
-            <div className="col-auto article-picture  p-2">
+            <div className=" article-picture  p-2">
                 {article.picture ? (
                     <img
                         src={`/image/article/${article.picture}`}
@@ -45,7 +45,7 @@ const ArticleListItem = (props) => {
                     <i className="fa fa-file-image-o" aria-hidden="true"></i>
                 )}
             </div>
-            <div className="article-item-content col-auto p-2">
+            <div className="article-item-content  p-2">
                 <div className="article-categories">
                     {article.tags.map((tag) => (
                         <Link

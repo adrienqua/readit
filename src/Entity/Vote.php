@@ -20,19 +20,19 @@ class Vote
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"vote:read", "article:read"})
+     * @Groups({"vote:read", "article:read", "comment:read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"vote:read", "vote:write", "article:read"})
+     * @Groups({"vote:read", "vote:write", "article:read", "comment:read"})
      */
     private $isUp;
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"vote:read", "vote:write", "article:read"})
+     * @Groups({"vote:read", "vote:write", "article:read", "comment:read"})
      */
     private $isDown;
 
@@ -42,7 +42,7 @@ class Vote
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="votes")
      *
-     * @Groups({"vote:read", "vote:write", "article:read"})
+     * @Groups({"vote:read", "vote:write", "article:read", "comment:read"})
      */
     private $user;
 
@@ -51,6 +51,12 @@ class Vote
      * @Groups({"vote:read", "vote:write"})
      */
     private $article;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Comment::class, inversedBy="votes")
+     * @Groups({"vote:read", "vote:write"})
+     */
+    private $comment;
 
 
     
@@ -111,6 +117,18 @@ class Vote
     public function setArticle(?Article $article): self
     {
         $this->article = $article;
+
+        return $this;
+    }
+
+    public function getComment(): ?Comment
+    {
+        return $this->comment;
+    }
+
+    public function setComment(?Comment $comment): self
+    {
+        $this->comment = $comment;
 
         return $this;
     }

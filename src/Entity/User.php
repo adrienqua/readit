@@ -111,7 +111,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @ORM\Column(type="integer", nullable=true)
      *
-     * @Groups({"user:read", "user:write", "article:read"})
+     * @Groups({"user:read", "user:write", "article:read", "comment:read"})
      */
     private $karma;
 

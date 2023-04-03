@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react"
-import { Link } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import Score from "../common/Score"
 import {
     deleteArticle,
@@ -13,6 +13,8 @@ import ArticleListItem from "./ArticleListItem"
 import { newFavorite } from "../services/favoriteAPI"
 import SearchBar from "./SearchBar"
 import { AuthContext } from "./../contexts/authContext"
+import { handleScroll } from "../scripts/scroll"
+import { handleNewScore, handleScore } from "../scripts/score"
 
 const ArticleList = (props) => {
     const [addVote, setAddVote] = useState()
@@ -28,13 +30,14 @@ const ArticleList = (props) => {
     const [user, setUser] = useContext(AuthContext)
 
     const { setArticles, articles, fetchArticles, loaded } = props
+    const history = useHistory()
 
     useEffect(() => {
         fetchArticles(page)
     }, [page])
 
     useEffect(() => {
-        handleScroll()
+        handleScroll(page, setPage, scrolled)
         setFiltered(articles)
     }, [articles])
 
@@ -72,7 +75,7 @@ const ArticleList = (props) => {
 
     const updateScore = async (item, action) => {
         if (!user.username) {
-            props.history.push("/login")
+            history.push("/login")
         }
 
         //check if the user got a vote from this article
@@ -87,7 +90,8 @@ const ArticleList = (props) => {
 
         if (!findScore) {
             console.log("New vote !")
-            handleNewScore(item, action, data, datas)
+            handleNewScore(action, data)
+            handleSubmitNewScore(item, data, datas)
             console.log("user ue", user, item, findScore)
         } else {
             console.log("update vote !")
@@ -96,19 +100,7 @@ const ArticleList = (props) => {
         }
     }
 
-    const handleNewScore = async (item, action, data, datas) => {
-        if (action === "-") {
-            var down = true
-            var up = false
-            data.score -= 1
-            data.author.karma -= 1
-        } else {
-            down = false
-            up = true
-            data.score += 1
-            data.author.karma += 1
-        }
-
+    const handleSubmitNewScore = async (item, data, datas) => {
         //Reformat
         const userId = user["@id"]
         const articleId = item["@id"].slice(1)
@@ -120,8 +112,8 @@ const ArticleList = (props) => {
             await newVote({
                 user: userId,
                 article: articleId,
-                isDown: down,
-                isUp: up,
+                isDown: data.down,
+                isUp: data.up,
             }).then((response) => {
                 //setUser
                 const newVoteId = response.data.id
@@ -157,41 +149,6 @@ const ArticleList = (props) => {
             })
         } catch (error) {
             console.log(error)
-        }
-    }
-
-    const handleScore = (item, action, data) => {
-        console.log("handlescore data", data)
-        if (action === "-") {
-            if (!item.votes[0].isDown) {
-                data.score -= 1
-                data.author.karma -= 1
-                item.votes[0].isDown = true
-                if (item.votes[0].isUp) {
-                    data.score -= 1
-                    data.author.karma -= 1
-                    item.votes[0].isUp = false
-                }
-            } else {
-                data.score += 1
-                data.author.karma += 1
-                item.votes[0].isDown = false
-            }
-        } else {
-            if (!item.votes[0].isUp) {
-                data.score += 1
-                data.author.karma += 1
-                item.votes[0].isUp = true
-                if (item.votes[0].isDown) {
-                    data.score += 1
-                    data.author.karma += 1
-                    item.votes[0].isDown = false
-                }
-            } else {
-                data.score -= 1
-                data.author.karma -= 1
-                item.votes[0].isUp = false
-            }
         }
     }
 
@@ -236,24 +193,6 @@ const ArticleList = (props) => {
             setFiltered(searchedArticle)
         } else {
             setSearchResult(articles)
-        }
-    }
-
-    const handleScroll = () => {
-        const handleScrollEvent = () => {
-            if (
-                window.scrollY + window.innerHeight >
-                document.getElementById("articles").offsetHeight
-            ) {
-                console.log("scrolled")
-                setPage(page + 1)
-                window.removeEventListener("scroll", handleScrollEvent)
-            }
-        }
-
-        window.addEventListener("scroll", handleScrollEvent)
-        if (scrolled === true) {
-            window.removeEventListener("scroll", handleScrollEvent)
         }
     }
 

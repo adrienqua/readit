@@ -1,4 +1,4 @@
-export const handleScroll = () => {
+export const handleScroll = (page, setPage, scrolled) => {
     const handleScrollEvent = () => {
         if (
             window.scrollY + window.innerHeight >

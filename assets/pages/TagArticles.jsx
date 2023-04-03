@@ -50,17 +50,19 @@ const TagArticles = (props) => {
 
     return (
         <React.Fragment>
-            <h1 className="text-center">
-                <i className="fa fa-fw fa-tags" aria-hidden="true"></i>Catégorie{" "}
-                {props.match.params.label}
-            </h1>
-            <ArticleList
-                articles={articles}
-                setArticles={setArticlesChild}
-                user={user}
-                fetchArticles={fetchArticles}
-                loaded={loaded}
-            />
+            <div id="articles">
+                <h1 className="text-center">
+                    <i className="fa fa-fw fa-tags" aria-hidden="true"></i>
+                    Catégorie {props.match.params.label}
+                </h1>
+                <ArticleList
+                    articles={articles}
+                    setArticles={setArticlesChild}
+                    user={user}
+                    fetchArticles={fetchArticles}
+                    loaded={loaded}
+                />
+            </div>
         </React.Fragment>
     )
 }
