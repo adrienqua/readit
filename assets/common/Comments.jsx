@@ -94,7 +94,7 @@ const Comments = (props) => {
             history.push("/login")
         }
 
-        //check if the user got a vote from this article
+        //check if the user got a vote from this comment
         const findScore = user?.votes?.some(
             (vote) => item.votes.map((v) => v["@id"]).indexOf(vote) >= 0
         )
@@ -146,7 +146,7 @@ const Comments = (props) => {
                     }))
                 }
 
-                //setArticles
+                //setComments
                 const newVote = {
                     ["@id"]: `/api/votes/${newVoteId}`,
                     id: newVoteId,

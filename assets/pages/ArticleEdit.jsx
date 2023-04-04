@@ -30,7 +30,7 @@ const ArticleEdit = ({ id, submitRef, setArticles, articles }) => {
 
     useEffect(() => {
         fetchArticle()
-    }, [articles])
+    }, [])
 
     const fetchArticle = async () => {
         try {
@@ -60,10 +60,11 @@ const ArticleEdit = ({ id, submitRef, setArticles, articles }) => {
         originalArticles[index] = article
         setArticles(originalArticles)
         try {
-            //reformat
-            const formatedArticle = { ...article }
-            formatedArticle.author = formatedArticle.author["@id"]
-            await updateArticle(id, formatedArticle)
+            await updateArticle(id, {
+                title: article.title,
+                content: article.content,
+                tags: article.tags,
+            })
         } catch (error) {
             console.log(error)
         }
