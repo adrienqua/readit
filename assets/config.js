@@ -1,1 +1,1 @@
-export const apiUrl = "https://localhost:8000/api/"
+export const apiUrl = process.env.API_URL

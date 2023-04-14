@@ -3,12 +3,12 @@ import { formatDate } from "../scripts/formatDate"
 import Input from "./Input"
 import Modal from "./Modal"
 import Score from "./Score"
+import { Link } from "react-router-dom"
 
 const CommentItem = (props) => {
     const {
         comment,
         isEdit,
-        date,
         handleDelete,
         handleEditChange,
         handleEditSubmit,
@@ -24,7 +24,10 @@ const CommentItem = (props) => {
                 <div className="comment-item-container ps-3">
                     <div className="comment-header d-flex">
                         <span className="comment-author me-auto">
-                            {comment.author.username}{" "}
+                            <Link to={`/user/${comment.author.username}`}>
+                                {comment.author.username}{" "}
+                            </Link>
+
                             <small className="comment-date text-muted">
                                 le {formatDate(comment.createdAt)}{" "}
                             </small>

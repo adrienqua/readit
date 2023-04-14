@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
-import { Link, useHistory } from "react-router-dom"
+import { Link } from "react-router-dom"
 import {
     getArticle,
     updateArticle,
@@ -10,8 +10,15 @@ import Input from "../common/Input"
 import { ToastContainer, toast } from "react-toastify"
 import { Multiselect } from "multiselect-react-dropdown"
 
-const ArticleEdit = ({ id, submitRef, setArticles, articles }) => {
-    const [tags, setTags] = useState([])
+const ArticleEdit = ({
+    id,
+    data,
+    tags,
+    submitRef,
+    onSubmit,
+    setIsValid,
+    closeValidatedFormRef,
+}) => {
     const [article, setArticle] = useState({
         title: "",
         content: "",
@@ -22,61 +29,14 @@ const ArticleEdit = ({ id, submitRef, setArticles, articles }) => {
             },
         ],
     })
-    let history = useHistory()
+    const [errors, setErrors] = useState({})
 
     useEffect(() => {
-        fetchTags()
+        setArticle(data)
     }, [])
-
-    useEffect(() => {
-        fetchArticle()
-    }, [])
-
-    const fetchArticle = async () => {
-        try {
-            setArticle(await getArticle(id))
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    const fetchTags = async () => {
-        try {
-            setTags(await getTags())
-        } catch (error) {
-            console.log(error)
-        }
-    }
 
     const handleChange = (e) => {
         setArticle({ ...article, [e.target.name]: e.target.value })
-    }
-
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-
-        const originalArticles = [...articles]
-        const index = originalArticles.findIndex((art) => art.id === article.id)
-        originalArticles[index] = article
-        setArticles(originalArticles)
-        try {
-            await updateArticle(id, {
-                title: article.title,
-                content: article.content,
-                tags: article.tags,
-            })
-        } catch (error) {
-            console.log(error)
-        }
-
-        if (article.file) {
-            const fileData = new FormData()
-            fileData.append("file", article.file[0])
-            await newArticlePicture(id, fileData)
-            window.location = "/"
-        }
-        //history.push("/")
-        toast.success("Publication modifiée.")
     }
 
     const onSelect = (selectedList, selectedItem) => {
@@ -88,14 +48,19 @@ const ArticleEdit = ({ id, submitRef, setArticles, articles }) => {
         setArticle({ ...article, tags: selectedList })
     }
 
+    const handleValidate = (e) => {
+        return e.preventDefault()
+    }
+
     return (
         <React.Fragment>
-            <form className="mt-4">
+            <form className="mt-4" method="POST">
                 <Input
                     name="title"
                     label="Titre"
                     handleChange={(e) => handleChange(e)}
                     value={article.title}
+                    error={errors.title}
                 />
                 <Input
                     type="file"
@@ -111,6 +76,7 @@ const ArticleEdit = ({ id, submitRef, setArticles, articles }) => {
                     label="Contenu"
                     handleChange={(e) => handleChange(e)}
                     value={article.content}
+                    error={errors.content}
                 />
                 <Multiselect
                     options={tags}
@@ -143,8 +109,22 @@ const ArticleEdit = ({ id, submitRef, setArticles, articles }) => {
                     type="submit"
                     value="Editer"
                     ref={submitRef}
-                    onClick={handleSubmit}
+                    onClick={(e) =>
+                        onSubmit(
+                            e,
+                            article,
+                            closeValidatedFormRef,
+                            setErrors,
+                            setIsValid
+                        )
+                    }
                 />
+                <button
+                    className="d-none"
+                    type="button"
+                    ref={closeValidatedFormRef}
+                    data-bs-dismiss="modal"
+                ></button>
             </form>
         </React.Fragment>
     )

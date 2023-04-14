@@ -50,25 +50,8 @@ export function updateArticle(id, component) {
         .then((response) => response.data)
 }
 
-export function newArticle(component, file) {
-    return axios.post(apiEndpoint, component).then((response) => {
-        const articleId = response.data["@id"].slice(1)
-        const userId = response.data.author["@id"].slice(1)
-        newVote({
-            user: userId,
-            article: articleId,
-            isUp: true,
-        })
-        if (file) {
-            const responseId = response.data.id
-            const fileData = new FormData()
-            fileData.append("file", file)
-            return axios.post(
-                apiEndpoint + "/" + responseId + "/picture",
-                fileData
-            )
-        }
-    })
+export function newArticle(component) {
+    return axios.post(apiEndpoint, component)
 }
 
 export function newArticlePicture(id, component) {

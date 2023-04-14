@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Assert\NotBlank;
+use Assert\Length;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ArticleRepository;
 use ApiPlatform\Core\Annotation\ApiFilter;
@@ -60,6 +61,13 @@ class Article
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="Le titre est obligatoire.")
+     * @Assert\Length(
+     *      min = 3,
+     *      max = 120,
+     *      minMessage = "Ce champ doit contenir plus de {{ limit }} caractères",
+     *      maxMessage = "Ce champ doit contenir moins de {{ limit }} caractères",
+     *      allowEmptyString = false
+     * )
      * @Groups({"article:read", "article:write"})
      */
     private $title;
@@ -75,13 +83,19 @@ class Article
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Assert\NotBlank(message="Le contenu est obligatoire.")
+     * @Assert\Length(
+     *      min = 3,
+     *      max = 750,
+     *      minMessage = "Ce champ doit contenir plus de {{ limit }} caractères",
+     *      maxMessage = "Ce champ doit contenir moins de {{ limit }} caractères",
+     *      allowEmptyString = false
+     * )
      * @Groups({"article:read", "article:write"})
      */
     private $content;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     *
      * @Groups("article:read")
      */
     private $picture;

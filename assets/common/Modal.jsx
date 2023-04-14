@@ -1,6 +1,13 @@
 import React from "react"
 
-const Modal = ({ id, handleSubmit, title, content, action = "Confirmer" }) => {
+const Modal = ({
+    id,
+    handleSubmit,
+    title,
+    content,
+    action = "Confirmer",
+    isValid = true,
+}) => {
     return (
         <React.Fragment>
             <div
@@ -39,8 +46,8 @@ const Modal = ({ id, handleSubmit, title, content, action = "Confirmer" }) => {
                                         : "btn-primary")
                                 }
                                 onClick={handleSubmit}
-                                data-bs-toggle="modal"
-                                data-bs-target={`#${id}`}
+                                data-bs-toggle={isValid ? "modal" : "null"}
+                                data-bs-target={isValid ? `#${id}` : "null"}
                             >
                                 <i
                                     className={

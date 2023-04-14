@@ -12,6 +12,7 @@ import { handleScore } from "./../scripts/score"
 import { AuthContext } from "../contexts/authContext"
 import { newVote, updateVote } from "../services/voteAPI"
 import { updateUser } from "../services/userAPI"
+import Loader from "./Loader"
 
 const Comments = (props) => {
     const [addComment, setAddComment] = useState({
@@ -28,8 +29,8 @@ const Comments = (props) => {
     useEffect(() => {}, [])
 
     const handleChange = (e) => {
-        const articleId = article["@id"].slice(1)
-        const userId = user["@id"].slice(1)
+        const articleId = article["@id"]
+        const userId = user["@id"]
 
         setAddComment({
             ...addComment,
@@ -119,7 +120,7 @@ const Comments = (props) => {
     const handleSubmitNewScore = async (item, data, datas) => {
         //Reformat
         const userId = user["@id"]
-        const commentId = item["@id"].slice(1)
+        const commentId = item["@id"]
         const author = data.author
         console.log(data)
 
@@ -171,10 +172,10 @@ const Comments = (props) => {
     const handleSubmitScore = async (item, data, datas) => {
         //Reformat
         const voteData = { ...item.votes[0] }
-        voteData.user = voteData.user["@id"].slice(1)
+        voteData.user = voteData.user["@id"]
 
         //Submit
-        console.log("submit datas", datas)
+        //console.log("submit datas", datas)
         setComments(datas)
         if (user.id === data.author.id) {
             setUser((prevState) => ({
@@ -209,6 +210,8 @@ const Comments = (props) => {
                                     value={newComment.content}
                                     onChange={(e) => handleChange(e)}
                                     rows="5"
+                                    required="required"
+                                    minLength={3}
                                 />
                                 <label>Commenter</label>
                             </div>
@@ -232,11 +235,7 @@ const Comments = (props) => {
                         Commentaires
                     </h2>
                     {!loaded ? (
-                        <div className="row loading">
-                            <div className="spinner-border" role="status">
-                                <span className="sr-only">Loading...</span>
-                            </div>
-                        </div>
+                        <Loader />
                     ) : (
                         <div className="row comment-list px-2">
                             {comments.map((comment) => (

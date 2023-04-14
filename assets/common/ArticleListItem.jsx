@@ -10,11 +10,12 @@ const ArticleListItem = (props) => {
     const {
         article,
         articles,
-        setArticles,
+        tags,
         updateScore,
         handleDelete,
         handleLike,
         articleKey,
+        handleSubmitEdit,
     } = props
 
     const [liked, setLiked] = useState(false)
@@ -22,6 +23,10 @@ const ArticleListItem = (props) => {
     const [user, setUser] = useContext(AuthContext)
 
     const editFormRef = useRef(null)
+
+    const closeValidatedFormRef = useRef(null)
+
+    const [isValid, setIsValid] = useState(false)
 
     useEffect(() => {
         //check if the user has liked an article
@@ -91,14 +96,6 @@ const ArticleListItem = (props) => {
                     />
                     {user.id === article.author.id && (
                         <>
-                            {/*                             <Link to={`/articles/${article.id}/edit`}>
-                                <button className="btn btn-sm btn-light mx-1">
-                                    <i
-                                        className="fa fa-pencil"
-                                        aria-hidden="true"
-                                    ></i>
-                                </button>
-                            </Link> */}
                             <button
                                 className="btn btn-sm btn-light mx-1"
                                 data-bs-toggle="modal"
@@ -124,12 +121,18 @@ const ArticleListItem = (props) => {
                                 handleSubmit={() => editFormRef.current.click()}
                                 action="Editer"
                                 title={`Editer l'article ${article.id}`}
+                                isValid={isValid}
                                 content={
                                     <ArticleEdit
                                         id={article.id}
+                                        data={article}
+                                        tags={tags}
                                         submitRef={editFormRef}
-                                        setArticles={setArticles}
-                                        articles={articles}
+                                        closeValidatedFormRef={
+                                            closeValidatedFormRef
+                                        }
+                                        onSubmit={handleSubmitEdit}
+                                        setIsValid={setIsValid}
                                     />
                                 }
                             />

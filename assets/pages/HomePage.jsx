@@ -2,11 +2,7 @@ import React, { useState, useEffect, useContext } from "react"
 
 import { Link } from "react-router-dom"
 import ArticleList from "../common/ArticleList"
-import {
-    getArticles,
-    deleteArticle,
-    updateArticle,
-} from "../services/articleAPI"
+import { getArticles } from "../services/articleAPI"
 
 import { newVote, updateVote } from "../services/voteAPI"
 import { getArticleVotes } from "../services/userAPI"

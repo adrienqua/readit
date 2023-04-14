@@ -2,12 +2,15 @@
 
 namespace App\Entity;
 
+use Assert\NotBlank;
+use Assert\Length;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CommentRepository;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
@@ -32,7 +35,14 @@ class Comment
 
     /**
      * @ORM\Column(type="text")
-     *
+     * @Assert\NotBlank(message="Le titre est obligatoire.")
+     * @Assert\Length(
+     *      min = 3,
+     *      max = 400,
+     *      minMessage = "Ce champ doit contenir plus de {{ limit }} caractères",
+     *      maxMessage = "Ce champ doit contenir moins de {{ limit }} caractères",
+     *      allowEmptyString = false
+     * )
      * @Groups({"comment:read", "comment:write", "article:read"})
      */
     private $content;

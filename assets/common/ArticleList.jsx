@@ -5,6 +5,7 @@ import {
     deleteArticle,
     updateArticle,
     getArticles,
+    newArticlePicture,
 } from "../services/articleAPI"
 import { updateUser } from "../services/userAPI"
 import { newVote, updateVote } from "../services/voteAPI"
@@ -15,6 +16,8 @@ import SearchBar from "./SearchBar"
 import { AuthContext } from "./../contexts/authContext"
 import { handleScroll } from "../scripts/scroll"
 import { handleNewScore, handleScore } from "../scripts/score"
+import Loader from "./Loader"
+import { getTags } from "../services/tagsAPI"
 
 const ArticleList = (props) => {
     const [addVote, setAddVote] = useState()
@@ -26,6 +29,7 @@ const ArticleList = (props) => {
 
     const [scrolled, setScrolled] = useState(false)
     const [page, setPage] = useState(1)
+    const [tags, setTags] = useState([])
 
     const [user, setUser] = useContext(AuthContext)
 
@@ -41,17 +45,13 @@ const ArticleList = (props) => {
         setFiltered(articles)
     }, [articles])
 
-    const fetchArticle = async () => {
-        try {
-            setArticles(await getArticles())
-        } catch (error) {
-            console.log(error)
-        }
-    }
+    useEffect(() => {
+        fetchTags()
+    }, [])
 
-    const addNewVote = async () => {
+    const fetchTags = async () => {
         try {
-            await newVote(addVote)
+            setTags(await getTags())
         } catch (error) {
             console.log(error)
         }
@@ -103,7 +103,7 @@ const ArticleList = (props) => {
     const handleSubmitNewScore = async (item, data, datas) => {
         //Reformat
         const userId = user["@id"]
-        const articleId = item["@id"].slice(1)
+        const articleId = item["@id"]
         const author = data.author
         console.log(data)
 
@@ -155,10 +155,10 @@ const ArticleList = (props) => {
     const handleSubmitScore = async (item, data, datas) => {
         //Reformat
         const voteData = { ...item.votes[0] }
-        voteData.user = voteData.user["@id"].slice(1)
+        voteData.user = voteData.user["@id"]
 
         //Submit
-        console.log("submit datas", datas)
+        //console.log("submit datas", datas)
         setArticles(datas)
         if (user.id === data.author.id) {
             setUser((prevState) => ({
@@ -181,7 +181,7 @@ const ArticleList = (props) => {
 
     const handleSearch = (query) => {
         const ogArticles = [...articles]
-        console.log(articles)
+        //console.log(articles)
         setSearchQuery(query)
         if (query !== "") {
             const searchedArticle = ogArticles.filter((article) => {
@@ -236,28 +236,74 @@ const ArticleList = (props) => {
         }
     }
 
+    const handleSubmitEdit = async (
+        e,
+        article,
+        closeRef,
+        setErrors,
+        setIsValid
+    ) => {
+        e.preventDefault()
+
+        try {
+            await updateArticle(article.id, {
+                title: article.title,
+                content: article.content,
+                tags: article.tags,
+            })
+            const originalArticles = [...articles]
+            const index = originalArticles.findIndex(
+                (art) => art.id === article.id
+            )
+            originalArticles[index] = article
+            setArticles(originalArticles)
+
+            setErrors({})
+            setIsValid(true)
+            closeRef.current.click()
+            //history.push("/")
+            toast.success("Publication modifiée.")
+        } catch (error) {
+            const violations = error.response.data["violations"]
+            console.log(violations)
+            const errorsObject = {}
+            violations.forEach((violation) => {
+                console.log(violation)
+                errorsObject[violation.propertyPath] = violation.message
+            })
+
+            setErrors(errorsObject)
+            setIsValid(false)
+        }
+
+        if (article.file) {
+            const fileData = new FormData()
+            fileData.append("file", article.file[0])
+            await newArticlePicture(article.id, fileData)
+            window.location = "/"
+        }
+    }
+
     return (
         <div>
             <SearchBar handleSearch={handleSearch} />
 
             {!loaded ? (
-                <div className="row loading">
-                    <div className="spinner-border" role="status">
-                        <span className="sr-only">Loading...</span>
-                    </div>
-                </div>
+                <Loader />
             ) : (
                 <div className="row article mb-5">
                     {filtered.map((article, key) => (
                         <ArticleListItem
                             articles={articles}
                             article={article}
+                            tags={tags}
                             setArticles={setArticles}
                             updateScore={updateScore}
                             handleDelete={handleDelete}
                             key={article.id}
                             articleKey={key}
                             handleLike={handleLike}
+                            handleSubmitEdit={handleSubmitEdit}
                         />
                     ))}
                 </div>

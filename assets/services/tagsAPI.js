@@ -21,6 +21,6 @@ export function getTagWithLabel(label) {
 
 export function getTagArticles(id, page) {
     return axios
-        .get(apiEndpoint + "/" + id + "/articles" + "/?page=" + page)
+        .get(apiEndpoint + "/" + id + "/articles" + "?page=" + page)
         .then((response) => response.data["hydra:member"])
 }

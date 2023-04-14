@@ -42,6 +42,7 @@ const Login = (props) => {
                         handleChange={(e) => handleChange(e)}
                         value={user.username}
                         required
+                        minLength={4}
                     />
                     <Input
                         name="password"
@@ -50,6 +51,7 @@ const Login = (props) => {
                         handleChange={(e) => handleChange(e)}
                         value={user.password}
                         required
+                        minLength={6}
                     />
 
                     <input
@@ -62,14 +64,14 @@ const Login = (props) => {
                     Vous n'avez pas de compte ?{" "}
                     <Link to="/register">Créer un compte</Link>
                 </p>
-                <hr className="my-4" />
+                {/*                 <hr className="my-4" />
                 <GoogleLogin
                     clientId="860887330842-bdb41pchu7tt096mv192o9mmup8meevo.apps.googleusercontent.com"
                     onSuccess={responseGoogle}
                     onFailure={responseGoogle}
                     cookiePolicy={"single_host_origin"}
                     buttonText="Se connecter avec Google"
-                />
+                /> */}
             </div>
         </React.Fragment>
     )

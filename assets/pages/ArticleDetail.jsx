@@ -1,6 +1,10 @@
-import React, { useState, useEffect, useContext } from "react"
+import React, { useState, useEffect, useRef, useContext } from "react"
 import { Link } from "react-router-dom"
-import { getArticle, getComments } from "../services/articleAPI"
+import {
+    getArticle,
+    getComments,
+    newArticlePicture,
+} from "../services/articleAPI"
 import { newComment } from "../services/commentAPI"
 import Comments from "../common/Comments"
 import Score from "../common/Score"
@@ -9,10 +13,16 @@ import { updateArticle } from "./../services/articleAPI"
 import { newVote, updateVote } from "../services/voteAPI"
 import { updateUser } from "../services/userAPI"
 import { AuthContext } from "../contexts/authContext"
+import Modal from "../common/Modal"
+import ArticleEdit from "./ArticleEdit"
+import { toast } from "react-toastify"
+import Loader from "../common/Loader"
+import { getTags } from "../services/tagsAPI"
 
 const ArticleDetail = (props) => {
     const [comments, setComments] = useState([])
     const [loaded, setLoaded] = useState(false)
+    const [tags, setTags] = useState([])
 
     const [article, setArticle] = useState({
         title: "",
@@ -25,11 +35,18 @@ const ArticleDetail = (props) => {
         ],
     })
 
+    const [isValid, setIsValid] = useState(false)
+
     const [user, setUser] = useContext(AuthContext)
+
+    const editFormRef = useRef(null)
+
+    const closeValidatedFormRef = useRef(null)
 
     useEffect(() => {
         fetchArticle()
         fetchComments()
+        fetchTags()
         console.log("art details ue")
     }, [])
 
@@ -45,6 +62,14 @@ const ArticleDetail = (props) => {
     const fetchComments = async () => {
         try {
             setComments(await getComments(props.match.params.id))
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const fetchTags = async () => {
+        try {
+            setTags(await getTags())
         } catch (error) {
             console.log(error)
         }
@@ -81,7 +106,7 @@ const ArticleDetail = (props) => {
     const handleSubmitNewScore = async (data) => {
         //Reformat
         const userId = user["@id"]
-        const articleId = data["@id"].slice(1)
+        const articleId = data["@id"]
         const author = data.author
         console.log(data)
 
@@ -134,7 +159,7 @@ const ArticleDetail = (props) => {
     const handleSubmitScore = async (item, data) => {
         //Reformat
         const voteData = { ...item.votes[0] }
-        voteData.user = voteData.user["@id"].slice(1)
+        voteData.user = voteData.user["@id"]
 
         //Submit
         setArticle(data)
@@ -156,16 +181,50 @@ const ArticleDetail = (props) => {
         }
     }
 
+    const handleSubmitEdit = async (e, article, closeRef, setErrors) => {
+        e.preventDefault()
+
+        try {
+            await updateArticle(article.id, {
+                title: article.title,
+                content: article.content,
+                tags: article.tags,
+            })
+            setArticle(article)
+
+            setErrors({})
+            setIsValid(true)
+            closeRef.current.click()
+
+            //history.push("/")
+            toast.success("Publication modifiée.")
+        } catch (error) {
+            const violations = error.response.data["violations"]
+            console.log(violations)
+            const errorsObject = {}
+            violations.forEach((violation) => {
+                console.log(violation)
+                errorsObject[violation.propertyPath] = violation.message
+            })
+
+            setErrors(errorsObject)
+            setIsValid(false)
+        }
+
+        if (article.file) {
+            const fileData = new FormData()
+            fileData.append("file", article.file[0])
+            await newArticlePicture(article.id, fileData)
+            window.location = "/"
+        }
+    }
+
     return (
         <React.Fragment>
             <div className="card mt-4 col-md-8 offset-md-2 p-3">
                 <div className="card-body">
                     {!loaded ? (
-                        <div className="row loading">
-                            <div className="spinner-border" role="status">
-                                <span className="sr-only">Loading...</span>
-                            </div>
-                        </div>
+                        <Loader />
                     ) : (
                         <React.Fragment>
                             <div className="article-header d-flex">
@@ -188,14 +247,36 @@ const ArticleDetail = (props) => {
                                 {" "}
                                 {article.content}
                             </p>
-                            <Link to={`/articles/${article.id}/edit`}>
-                                <button className="btn btn-light mx-1">
-                                    <i
-                                        className="fa fa-pencil"
-                                        aria-hidden="true"
-                                    ></i>
-                                </button>
-                            </Link>
+                            <button
+                                className="btn btn-sm btn-light mx-1"
+                                data-bs-toggle="modal"
+                                data-bs-target={`#editArticleModal${article.id}`}
+                            >
+                                <i
+                                    className="fa fa-pencil"
+                                    aria-hidden="true"
+                                ></i>
+                            </button>
+                            <Modal
+                                id={`editArticleModal${article.id}`}
+                                handleSubmit={() => editFormRef.current.click()}
+                                action="Editer"
+                                title={`Editer l'article ${article.id}`}
+                                isValid={isValid}
+                                content={
+                                    <ArticleEdit
+                                        id={article.id}
+                                        data={article}
+                                        tags={tags}
+                                        submitRef={editFormRef}
+                                        closeValidatedFormRef={
+                                            closeValidatedFormRef
+                                        }
+                                        onSubmit={handleSubmitEdit}
+                                        setIsValid={setIsValid}
+                                    />
+                                }
+                            />
                         </React.Fragment>
                     )}
                 </div>

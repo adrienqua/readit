@@ -80,7 +80,6 @@ const App = () => {
                             path="/articles/new"
                             exact
                             component={ArticleNew}
-                            user={user}
                         />
                         <Route
                             path="/article/:id"
@@ -116,7 +115,7 @@ const App = () => {
                             render={(props) => <Test {...props} user={user} />}
                         />
                         <Route
-                            path="/profile"
+                            path="/user/:username"
                             exact
                             render={(props) => (
                                 <UserSettings

@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useContext } from "react"
 import { Link } from "react-router-dom"
-import { newArticle } from "../services/articleAPI"
+import { newArticle, newArticlePicture } from "../services/articleAPI"
 import { getTags } from "../services/tagsAPI"
 import { updateUser } from "../services/userAPI"
 import { toast } from "react-toastify"
 import Input from "../common/Input"
 import { Multiselect } from "multiselect-react-dropdown"
+import { AuthContext } from "./../contexts/authContext"
+import { newVote } from "../services/voteAPI"
 
 const ArticleNew = (props) => {
     const [tags, setTags] = useState([])
@@ -22,7 +24,7 @@ const ArticleNew = (props) => {
     })
     const [errors, setErrors] = useState({})
 
-    const { user } = props
+    const [user, setUser] = useContext(AuthContext)
 
     useEffect(() => {
         fetchTags()
@@ -31,7 +33,7 @@ const ArticleNew = (props) => {
     const fetchTags = async () => {
         try {
             setTags(await getTags())
-            const userId = user["@id"].slice(1)
+            const userId = user["@id"]
             console.log(userId)
             setArticle({ ...article, author: userId })
         } catch (error) {
@@ -50,11 +52,38 @@ const ArticleNew = (props) => {
         e.preventDefault()
 
         try {
-            await newArticle(article, article.file[0])
+            await newArticle(article).then((response) => {
+                //Upvote the publication by default
+                const articleId = response.data["@id"]
+                const userId = response.data.author["@id"]
+                const file = article.file[0]
+                newVote({
+                    user: userId,
+                    article: articleId,
+                    isUp: true,
+                }).then((response) => {
+                    //Update user score and add the vote to the user
+                    const voteId = response.data["@id"]
+                    const userVotes = [...user.votes].concat(voteId)
+                    setUser({
+                        ...user,
+                        karma: user.karma + 1,
+                        votes: userVotes,
+                    })
+                })
+                if (file) {
+                    const responseId = response.data.id
+                    const fileData = new FormData()
+                    fileData.append("file", file)
+                    return newArticlePicture(responseId, fileData)
+                }
+            })
             await updateUser(user.id, {
                 karma: user.karma + 1,
             })
+
             props.history.push("/")
+
             toast.success("Publication créée.")
         } catch (error) {
             const violations = error.response.data["violations"]
@@ -88,46 +117,51 @@ const ArticleNew = (props) => {
 
     return (
         <React.Fragment>
-            <h1>
-                <i className="fa fa-fw fa-newspaper-o" aria-hidden="true"></i>{" "}
-                Créer une publication
-            </h1>
+            <div className="col-md-6 offset-md-3">
+                <h1>
+                    <i
+                        className="fa fa-fw fa-newspaper-o"
+                        aria-hidden="true"
+                    ></i>{" "}
+                    Créer une publication
+                </h1>
 
-            <form onSubmit={handleSubmit} className="mt-4">
-                <Input
-                    name="title"
-                    label="Titre"
-                    handleChange={(e) => handleChange(e)}
-                    error={errors.title}
-                />
-                <Input
-                    type="file"
-                    name="picture"
-                    label="Téléverser une image"
-                    handleChange={(e) =>
-                        setArticle({ ...article, file: e.target.files })
-                    }
-                />
-                <Input
-                    input="textarea"
-                    name="content"
-                    label="Contenu"
-                    handleChange={(e) => handleChange(e)}
-                    error={errors.content}
-                />
-                <Multiselect
-                    options={tags}
-                    displayValue="label"
-                    placeholder="Catégories"
-                    onSelect={onSelect}
-                    onRemove={onRemove}
-                />
-                <input
-                    className="btn btn-primary mt-1"
-                    type="submit"
-                    value="Publier"
-                />
-            </form>
+                <form onSubmit={handleSubmit} className="mt-4">
+                    <Input
+                        name="title"
+                        label="Titre"
+                        handleChange={(e) => handleChange(e)}
+                        error={errors.title}
+                    />
+                    <Input
+                        type="file"
+                        name="picture"
+                        label="Téléverser une image"
+                        handleChange={(e) =>
+                            setArticle({ ...article, file: e.target.files })
+                        }
+                    />
+                    <Input
+                        input="textarea"
+                        name="content"
+                        label="Contenu"
+                        handleChange={(e) => handleChange(e)}
+                        error={errors.content}
+                    />
+                    <Multiselect
+                        options={tags}
+                        displayValue="label"
+                        placeholder="Catégories"
+                        onSelect={onSelect}
+                        onRemove={onRemove}
+                    />
+                    <input
+                        className="btn btn-primary mt-1"
+                        type="submit"
+                        value="Publier"
+                    />
+                </form>
+            </div>
         </React.Fragment>
     )
 }
