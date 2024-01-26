@@ -1,5 +1,6 @@
 import axios from "axios"
 import { apiUrl } from "../config.js"
+import { getCurrentUser } from "./auth.js"
 
 const apiEndpoint = apiUrl + "comments"
 
@@ -20,5 +21,19 @@ export function deleteComment(id) {
 }
 
 export function getCommentChilds(parentId) {
-    return axios.get(`${apiEndpoint}?parentId=${parentId}`).then((res) => res.data["hydra:member"].reverse())
+    return axios.get(`${apiEndpoint}?parentId=${parentId}`).then((res) => {
+        const data = res.data["hydra:member"].reverse()
+
+        const user = getCurrentUser()
+        data.map((item) => {
+            if (user) {
+                const filtered = item.votes?.filter((a) => a.user?.username == user.username)
+                item.votes = filtered
+            } else {
+                item.votes = []
+            }
+            return item
+        })
+        return data
+    })
 }

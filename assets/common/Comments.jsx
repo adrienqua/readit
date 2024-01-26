@@ -37,6 +37,10 @@ const Comments = (props) => {
         e.preventDefault()
         e.target.reset()
 
+        if (!user.username) {
+            return history.push("/login")
+        }
+
         await newComment(addComment)
         await fetchComments()
         toast.success("Commentaire ajouté.")

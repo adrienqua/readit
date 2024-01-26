@@ -106,6 +106,10 @@ const ArticleList = (props) => {
     }
 
     const handleLike = async (id, like, key, data) => {
+        if (!user.username) {
+            history.push("/login")
+        }
+
         try {
             const newArticles = [...articles]
             const newUserFavorite = [...user.favorites]

@@ -26,15 +26,13 @@ export function getArticle(id) {
     return axios.get(apiEndpoint + "/" + id).then((response) => {
         const data = response.data
         const user = getCurrentUser()
-        data.comments.map((item) => {
-            if (user) {
-                const filtered = item.votes?.filter((a) => a.user?.username == user.username)
-                item.votes = filtered
-            } else {
-                item.votes = []
-            }
-        })
-        data.comments.reverse()
+        if (user) {
+            const filtered = data.votes?.filter((a) => a.user?.username == user.username)
+            data.votes = filtered
+        } else {
+            data.votes = []
+        }
+
         return data
     })
 }
@@ -59,7 +57,21 @@ export function deleteArticle(id) {
 }
 
 export function getComments(id) {
-    return axios.get(apiEndpoint + "/" + id + "/comments").then((response) => response.data["hydra:member"].reverse())
+    return axios.get(apiEndpoint + "/" + id + "/comments").then((response) => {
+        const data = response.data["hydra:member"].reverse()
+
+        const user = getCurrentUser()
+        data.map((item) => {
+            if (user) {
+                const filtered = item.votes?.filter((a) => a.user?.username == user.username)
+                item.votes = filtered
+            } else {
+                item.votes = []
+            }
+            return item
+        })
+        return data
+    })
 }
 
 export function getFavoritesArticles(user, page) {

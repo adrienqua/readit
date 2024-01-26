@@ -10,6 +10,7 @@ import ArticleEdit from "./ArticleEdit"
 import { toast } from "react-toastify"
 import Loader from "../common/Loader"
 import { getTags } from "../services/tagsAPI"
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min"
 
 const ArticleDetail = (props) => {
     const [comments, setComments] = useState([])
@@ -34,6 +35,8 @@ const ArticleDetail = (props) => {
     const editFormRef = useRef(null)
 
     const closeValidatedFormRef = useRef(null)
+
+    const history = useHistory()
 
     useEffect(() => {
         fetchArticle()
@@ -149,13 +152,15 @@ const ArticleDetail = (props) => {
                                 </div>
                             </div>
                             <p className="article-content mt-3"> {article.content}</p>
-                            <button
-                                className="btn btn-sm btn-light mx-1"
-                                data-bs-toggle="modal"
-                                data-bs-target={`#editArticleModal${article.id}`}
-                            >
-                                <i className="fa fa-pencil" aria-hidden="true"></i>
-                            </button>
+                            {user.id === article.author.id && (
+                                <button
+                                    className="btn btn-sm btn-light mx-1"
+                                    data-bs-toggle="modal"
+                                    data-bs-target={`#editArticleModal${article.id}`}
+                                >
+                                    <i className="fa fa-pencil" aria-hidden="true"></i>
+                                </button>
+                            )}
                             <Modal
                                 id={`editArticleModal${article.id}`}
                                 handleSubmit={() => editFormRef.current.click()}

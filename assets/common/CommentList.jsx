@@ -2,11 +2,14 @@ import React, { useContext, useEffect, useState } from "react"
 import CommentItem from "./CommentItem"
 import { handleNewScore, handleScore, handleSubmitNewScore, handleSubmitScore } from "../scripts/score"
 import { AuthContext } from "../contexts/authContext"
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min"
 
 export default function CommentList({ comments, article, handleEditSubmit, fetchComments, isLoaded, setIsLoaded }) {
     const [commentList, setCommentList] = useState(comments)
 
     const [user, setUser] = useContext(AuthContext)
+
+    const history = useHistory()
 
     const handleDelete = async (data) => {
         const ogComment = comments

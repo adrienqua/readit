@@ -6,6 +6,7 @@ import { Link } from "react-router-dom"
 import CommentForm from "./CommentForm"
 import { getCommentChilds } from "../services/commentAPI"
 import CommentList from "./CommentList"
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min"
 
 const CommentItem = (props) => {
     const {
@@ -24,7 +25,13 @@ const CommentItem = (props) => {
     const [isReplying, setIsReplying] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
 
+    const history = useHistory()
+
     const handleReply = () => {
+        if (!user.username) {
+            history.push("/login")
+        }
+
         setIsReplying(!isReplying)
     }
 
