@@ -1,24 +1,8 @@
-import React, { useState, useEffect, useRef } from "react"
-import { Link } from "react-router-dom"
-import {
-    getArticle,
-    updateArticle,
-    newArticlePicture,
-} from "../services/articleAPI"
-import { getTags } from "../services/tagsAPI"
+import React, { useState, useEffect } from "react"
 import Input from "../common/Input"
-import { ToastContainer, toast } from "react-toastify"
 import { Multiselect } from "multiselect-react-dropdown"
 
-const ArticleEdit = ({
-    id,
-    data,
-    tags,
-    submitRef,
-    onSubmit,
-    setIsValid,
-    closeValidatedFormRef,
-}) => {
+const ArticleEdit = ({ id, data, tags, submitRef, onSubmit, setIsValid, closeValidatedFormRef }) => {
     const [article, setArticle] = useState({
         title: "",
         content: "",
@@ -66,9 +50,7 @@ const ArticleEdit = ({
                     type="file"
                     name="picture"
                     label="Téléverser une image"
-                    handleChange={(e) =>
-                        setArticle({ ...article, file: e.target.files })
-                    }
+                    handleChange={(e) => setArticle({ ...article, file: e.target.files })}
                 />
                 <Input
                     input="textarea"
@@ -109,22 +91,9 @@ const ArticleEdit = ({
                     type="submit"
                     value="Editer"
                     ref={submitRef}
-                    onClick={(e) =>
-                        onSubmit(
-                            e,
-                            article,
-                            closeValidatedFormRef,
-                            setErrors,
-                            setIsValid
-                        )
-                    }
+                    onClick={(e) => onSubmit(e, article, closeValidatedFormRef, setErrors, setIsValid)}
                 />
-                <button
-                    className="d-none"
-                    type="button"
-                    ref={closeValidatedFormRef}
-                    data-bs-dismiss="modal"
-                ></button>
+                <button className="d-none" type="button" ref={closeValidatedFormRef} data-bs-dismiss="modal"></button>
             </form>
         </React.Fragment>
     )

@@ -1,21 +1,13 @@
 import React, { useState, useEffect, useContext } from "react"
 import { useHistory } from "react-router-dom"
-import Score from "../common/Score"
-import {
-    deleteArticle,
-    updateArticle,
-    getArticles,
-    newArticlePicture,
-} from "../services/articleAPI"
-import { updateUser } from "../services/userAPI"
-import { newVote, updateVote } from "../services/voteAPI"
+import { deleteArticle, updateArticle, newArticlePicture } from "../services/articleAPI"
 import { toast } from "react-toastify"
 import ArticleListItem from "./ArticleListItem"
 import { newFavorite } from "../services/favoriteAPI"
 import SearchBar from "./SearchBar"
 import { AuthContext } from "./../contexts/authContext"
 import { handleScroll } from "../scripts/scroll"
-import { handleNewScore, handleScore } from "../scripts/score"
+import { handleNewScore, handleScore, handleSubmitNewScore, handleSubmitScore } from "../scripts/score"
 import Loader from "./Loader"
 import { getTags } from "../services/tagsAPI"
 
@@ -79,9 +71,7 @@ const ArticleList = (props) => {
         }
 
         //check if the user got a vote from this article
-        const findScore = user?.votes?.some(
-            (vote) => item.votes.map((v) => v["@id"]).indexOf(vote) >= 0
-        )
+        const findScore = user?.votes?.some((vote) => item.votes.map((v) => v["@id"]).indexOf(vote) >= 0)
 
         const datas = [...articles]
         const index = datas.indexOf(item)
@@ -91,91 +81,12 @@ const ArticleList = (props) => {
         if (!findScore) {
             console.log("New vote !")
             handleNewScore(action, data)
-            handleSubmitNewScore(item, data, datas)
+            handleSubmitNewScore(data, datas, setArticles, user, setUser)
             console.log("user ue", user, item, findScore)
         } else {
             console.log("update vote !")
             handleScore(item, action, data)
-            handleSubmitScore(item, data, datas)
-        }
-    }
-
-    const handleSubmitNewScore = async (item, data, datas) => {
-        //Reformat
-        const userId = user["@id"]
-        const articleId = item["@id"]
-        const author = data.author
-        console.log(data)
-
-        //Submit
-        try {
-            await newVote({
-                user: userId,
-                article: articleId,
-                isDown: data.down,
-                isUp: data.up,
-            }).then((response) => {
-                //setUser
-                const newVoteId = response.data.id
-                const userNewVotes = [...user.votes]
-                userNewVotes.push(`/api/votes/${newVoteId}`)
-                setUser((prevState) => ({
-                    ...prevState,
-                    votes: userNewVotes,
-                }))
-                if (user.id === data.author.id) {
-                    setUser((prevState) => ({
-                        ...prevState,
-                        karma: data.author.karma,
-                    }))
-                }
-
-                //setArticles
-                const newVote = {
-                    ["@id"]: `/api/votes/${newVoteId}`,
-                    id: newVoteId,
-                    isUp: response.data.isUp,
-                    isDown: response.data.isDown,
-                    user: {
-                        ["@id"]: userId,
-                    },
-                }
-                data.votes.push(newVote)
-                setArticles(datas)
-            })
-            await updateArticle(data.id, { score: data.score })
-            await updateUser(author.id, {
-                karma: author.karma,
-            })
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    const handleSubmitScore = async (item, data, datas) => {
-        //Reformat
-        const voteData = { ...item.votes[0] }
-        voteData.user = voteData.user["@id"]
-
-        //Submit
-        //console.log("submit datas", datas)
-        setArticles(datas)
-        if (user.id === data.author.id) {
-            setUser((prevState) => ({
-                ...prevState,
-                karma: data.author.karma,
-            }))
-        }
-
-        console.log("votes", voteData)
-        try {
-            await updateArticle(data.id, { score: data.score })
-            await updateVote(item.votes[0].id, voteData)
-            await updateUser(data.author.id, {
-                karma: data.author.karma,
-            })
-        } catch (error) {
-            console.log(error)
+            handleSubmitScore(data, datas, setArticles, user, setUser)
         }
     }
 
@@ -185,9 +96,7 @@ const ArticleList = (props) => {
         setSearchQuery(query)
         if (query !== "") {
             const searchedArticle = ogArticles.filter((article) => {
-                return JSON.stringify(article)
-                    .toLowerCase()
-                    .includes(query.toLowerCase())
+                return JSON.stringify(article).toLowerCase().includes(query.toLowerCase())
             })
             setSearchResult(searchedArticle)
             setFiltered(searchedArticle)
@@ -207,18 +116,14 @@ const ArticleList = (props) => {
                     article: `/api/articles/${id}`,
                 }).then((response) => {
                     const newFavorite = response.data.id
-                    newArticles[key]["favorites"].push(
-                        `/api/favorites/${newFavorite}`
-                    )
+                    newArticles[key]["favorites"].push(`/api/favorites/${newFavorite}`)
                     newUserFavorite.push(`/api/favorites/${newFavorite}`)
                     setArticles(newArticles)
                     setUser({ ...user, favorites: newUserFavorite })
                 })
             }
             if (like === "dislike") {
-                const filterArray = user.favorites.filter((fav) =>
-                    data.favorites.includes(fav)
-                )
+                const filterArray = user.favorites.filter((fav) => data.favorites.includes(fav))
                 const indexOf = data.favorites.indexOf(filterArray.toString())
                 data.favorites.splice(0, 1)
                 console.log(indexOf, data.favorites)
@@ -236,13 +141,7 @@ const ArticleList = (props) => {
         }
     }
 
-    const handleSubmitEdit = async (
-        e,
-        article,
-        closeRef,
-        setErrors,
-        setIsValid
-    ) => {
+    const handleSubmitEdit = async (e, article, closeRef, setErrors, setIsValid) => {
         e.preventDefault()
 
         try {
@@ -252,9 +151,7 @@ const ArticleList = (props) => {
                 tags: article.tags,
             })
             const originalArticles = [...articles]
-            const index = originalArticles.findIndex(
-                (art) => art.id === article.id
-            )
+            const index = originalArticles.findIndex((art) => art.id === article.id)
             originalArticles[index] = article
             setArticles(originalArticles)
 

@@ -1,17 +1,9 @@
 import React, { useState, useEffect, useRef, useContext } from "react"
-import { Link } from "react-router-dom"
-import {
-    getArticle,
-    getComments,
-    newArticlePicture,
-} from "../services/articleAPI"
-import { newComment } from "../services/commentAPI"
+import { getArticle, getComments, newArticlePicture } from "../services/articleAPI"
 import Comments from "../common/Comments"
 import Score from "../common/Score"
-import { handleNewScore, handleScore } from "../scripts/score"
+import { handleNewScore, handleScore, handleSubmitNewScore, handleSubmitScore } from "../scripts/score"
 import { updateArticle } from "./../services/articleAPI"
-import { newVote, updateVote } from "../services/voteAPI"
-import { updateUser } from "../services/userAPI"
 import { AuthContext } from "../contexts/authContext"
 import Modal from "../common/Modal"
 import ArticleEdit from "./ArticleEdit"
@@ -85,99 +77,19 @@ const ArticleDetail = (props) => {
         }
 
         //check if the user got a vote from this article
-        const findScore = user?.votes?.some(
-            (vote) => item.votes.map((v) => v["@id"]).indexOf(vote) >= 0
-        )
+        const findScore = user?.votes?.some((vote) => item.votes.map((v) => v["@id"]).indexOf(vote) >= 0)
 
         const data = { ...item }
 
         if (!findScore) {
             console.log("New vote !")
             handleNewScore(action, data)
-            handleSubmitNewScore(data)
+            handleSubmitNewScore(data, data, setArticle, user, setUser)
             console.log("user ue", user, item, findScore)
         } else {
             console.log("update vote !")
             handleScore(item, action, data)
-            handleSubmitScore(item, data)
-        }
-    }
-
-    const handleSubmitNewScore = async (data) => {
-        //Reformat
-        const userId = user["@id"]
-        const articleId = data["@id"]
-        const author = data.author
-        console.log(data)
-
-        //Submit
-        try {
-            await newVote({
-                user: userId,
-                article: articleId,
-                isDown: data.down,
-                isUp: data.up,
-            }).then((response) => {
-                //setUser
-                const newVoteId = response.data.id
-                const userNewVotes = [...user.votes]
-                userNewVotes.push(`/api/votes/${newVoteId}`)
-                setUser((prevState) => ({
-                    ...prevState,
-                    votes: userNewVotes,
-                }))
-                if (user.id === data.author.id) {
-                    setUser((prevState) => ({
-                        ...prevState,
-                        karma: data.author.karma,
-                    }))
-                }
-
-                //setArticle
-                const newVote = {
-                    ["@id"]: `/api/votes/${newVoteId}`,
-                    id: newVoteId,
-                    isUp: response.data.isUp,
-                    isDown: response.data.isDown,
-                    user: {
-                        ["@id"]: userId,
-                    },
-                }
-                data.votes.push(newVote)
-                console.log("dataa", data)
-                setArticle(data)
-            })
-            await updateArticle(data.id, { score: data.score })
-            await updateUser(author.id, {
-                karma: author.karma,
-            })
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    const handleSubmitScore = async (item, data) => {
-        //Reformat
-        const voteData = { ...item.votes[0] }
-        voteData.user = voteData.user["@id"]
-
-        //Submit
-        setArticle(data)
-        if (user.id === data.author.id) {
-            setUser((prevState) => ({
-                ...prevState,
-                karma: data.author.karma,
-            }))
-        }
-
-        try {
-            await updateArticle(data.id, { score: data.score })
-            await updateVote(item.votes[0].id, voteData)
-            await updateUser(data.author.id, {
-                karma: data.author.karma,
-            })
-        } catch (error) {
-            console.log(error)
+            handleSubmitScore(data, data, setArticle, user, setUser)
         }
     }
 
@@ -228,34 +140,21 @@ const ArticleDetail = (props) => {
                     ) : (
                         <React.Fragment>
                             <div className="article-header d-flex">
-                                <Score
-                                    data={article}
-                                    updateScore={updateScore}
-                                />
+                                <Score data={article} updateScore={updateScore} />
                                 <div className="article-header-container ps-3">
                                     <div className="article-categories">
-                                        <span className="badge bg-secondary">
-                                            {article.tags[0].label}
-                                        </span>
+                                        <span className="badge bg-secondary">{article.tags[0].label}</span>
                                     </div>
-                                    <h1 className="card-title">
-                                        {article.title}
-                                    </h1>
+                                    <h1 className="card-title">{article.title}</h1>
                                 </div>
                             </div>
-                            <p className="article-content mt-3">
-                                {" "}
-                                {article.content}
-                            </p>
+                            <p className="article-content mt-3"> {article.content}</p>
                             <button
                                 className="btn btn-sm btn-light mx-1"
                                 data-bs-toggle="modal"
                                 data-bs-target={`#editArticleModal${article.id}`}
                             >
-                                <i
-                                    className="fa fa-pencil"
-                                    aria-hidden="true"
-                                ></i>
+                                <i className="fa fa-pencil" aria-hidden="true"></i>
                             </button>
                             <Modal
                                 id={`editArticleModal${article.id}`}
@@ -269,9 +168,7 @@ const ArticleDetail = (props) => {
                                         data={article}
                                         tags={tags}
                                         submitRef={editFormRef}
-                                        closeValidatedFormRef={
-                                            closeValidatedFormRef
-                                        }
+                                        closeValidatedFormRef={closeValidatedFormRef}
                                         onSubmit={handleSubmitEdit}
                                         setIsValid={setIsValid}
                                     />

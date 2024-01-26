@@ -11,9 +11,7 @@ export function getArticles(page) {
         const user = getCurrentUser()
         data.map((item) => {
             if (user) {
-                const filtered = item.votes.filter(
-                    (a) => a.user?.username == user.username
-                )
+                const filtered = item.votes.filter((a) => a.user?.username == user.username)
                 item.votes = filtered
             } else {
                 item.votes = []
@@ -30,14 +28,13 @@ export function getArticle(id) {
         const user = getCurrentUser()
         data.comments.map((item) => {
             if (user) {
-                const filtered = item.votes?.filter(
-                    (a) => a.user?.username == user.username
-                )
+                const filtered = item.votes?.filter((a) => a.user?.username == user.username)
                 item.votes = filtered
             } else {
                 item.votes = []
             }
         })
+        data.comments.reverse()
         return data
     })
 }
@@ -62,9 +59,7 @@ export function deleteArticle(id) {
 }
 
 export function getComments(id) {
-    return axios
-        .get(apiEndpoint + "/" + id + "/comments")
-        .then((response) => response.data["hydra:member"])
+    return axios.get(apiEndpoint + "/" + id + "/comments").then((response) => response.data["hydra:member"].reverse())
 }
 
 export function getFavoritesArticles(user, page) {

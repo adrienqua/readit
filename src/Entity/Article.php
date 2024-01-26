@@ -85,7 +85,7 @@ class Article
      * @Assert\NotBlank(message="Le contenu est obligatoire.")
      * @Assert\Length(
      *      min = 3,
-     *      max = 750,
+     *      max = 3000,
      *      minMessage = "Ce champ doit contenir plus de {{ limit }} caractères",
      *      maxMessage = "Ce champ doit contenir moins de {{ limit }} caractères",
      *      allowEmptyString = false

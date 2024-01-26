@@ -25,17 +25,11 @@ const Score = (props) => {
     return (
         <React.Fragment>
             <div className="score g-0 p-2">
-                <button
-                    className="btn btn-light"
-                    onClick={() => updateScore(data, "-")}
-                >
+                <button className="btn btn-light" onClick={() => updateScore(data, "-")}>
                     <i className={`fa fa-arrow-down ${colorDown}`}></i>
                 </button>{" "}
                 <span className={`fw-bold ${colorScore}`}>{data.score}</span>{" "}
-                <button
-                    className="btn btn-light"
-                    onClick={() => updateScore(data, "+")}
-                >
+                <button className="btn btn-light" onClick={() => updateScore(data, "+")}>
                     <i className={`fa fa-arrow-up ${colorUp}`}></i>
                 </button>
             </div>

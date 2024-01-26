@@ -4,15 +4,6 @@ import { Link } from "react-router-dom"
 import ArticleList from "../common/ArticleList"
 import { getArticles } from "../services/articleAPI"
 
-import { newVote, updateVote } from "../services/voteAPI"
-import { getArticleVotes } from "../services/userAPI"
-import { toast } from "react-toastify"
-import { ArrowUp, CaretUpFill } from "react-bootstrap-icons"
-import SearchBar from "../common/SearchBar"
-import { handleScroll } from "../scripts/scroll"
-import { newFavorite } from "../services/favoriteAPI"
-import { AuthContext } from "./../contexts/authContext"
-
 const HomePage = ({ user }) => {
     const [articles, setArticles] = useState([])
     const [score, setScore] = useState(0)
@@ -27,9 +18,7 @@ const HomePage = ({ user }) => {
 
     const fetchArticles = async (pageNumber) => {
         try {
-            const formatArray = [...articles].concat(
-                await getArticles(pageNumber)
-            )
+            const formatArray = [...articles].concat(await getArticles(pageNumber))
             if (formatArray.length === articles.length) {
                 setScrolled(true)
             }
@@ -49,8 +38,7 @@ const HomePage = ({ user }) => {
                 <div className="row article-add my-4 text-center">
                     <div className="col-lg-12">
                         <Link to={`/articles/new`} className="btn btn-primary">
-                            <i className="fa fa-plus"></i> Ajouter une
-                            publication
+                            <i className="fa fa-plus"></i> Ajouter une publication
                         </Link>
                     </div>
                 </div>

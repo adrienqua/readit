@@ -6,18 +6,21 @@ use Assert\NotBlank;
 use Assert\Length;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CommentRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 
 /**
  * @ApiResource(
  *     normalizationContext={"groups"={"comment:read"}},
  *     denormalizationContext={"groups"={"comment:write"}}
  * )
+ * @ApiFilter(SearchFilter::class, properties={"parentId": "exact", })
  * @ORM\Entity(repositoryClass=CommentRepository::class)
  */
 class Comment
@@ -83,8 +86,12 @@ class Comment
      */
     private $score;
 
-
-
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     *
+     * @Groups({"comment:read", "comment:write", "article:read"})
+     */
+    private $parentId;
 
 
     public function __construct()
@@ -187,6 +194,18 @@ class Comment
     public function setScore(?int $score): self
     {
         $this->score = $score;
+
+        return $this;
+    }
+
+    public function getParentId(): ?int
+    {
+        return $this->parentId;
+    }
+
+    public function setParentId(?int $parentId): self
+    {
+        $this->parentId = $parentId;
 
         return $this;
     }
