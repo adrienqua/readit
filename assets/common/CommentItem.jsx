@@ -17,8 +17,8 @@ const CommentItem = (props) => {
         updateScore,
         user,
         fetchComments,
+        commentList,
         setCommentList,
-        comments,
         article,
     } = props
 
@@ -38,7 +38,7 @@ const CommentItem = (props) => {
     const fetchCommentsChilds = async () => {
         const datas = await getCommentChilds(comment.id)
 
-        const commentsClone = [...comments]
+        const commentsClone = [...commentList]
         const index = commentsClone.indexOf(comment)
         commentsClone[index].subcomments = datas
         setCommentList(commentsClone)

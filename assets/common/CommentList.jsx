@@ -3,6 +3,8 @@ import CommentItem from "./CommentItem"
 import { handleNewScore, handleScore, handleSubmitNewScore, handleSubmitScore } from "../scripts/score"
 import { AuthContext } from "../contexts/authContext"
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min"
+import { deleteComment } from "../services/commentAPI"
+import { toast } from "react-toastify"
 
 export default function CommentList({ comments, article, handleEditSubmit, fetchComments, isLoaded, setIsLoaded }) {
     const [commentList, setCommentList] = useState(comments)
@@ -25,7 +27,7 @@ export default function CommentList({ comments, article, handleEditSubmit, fetch
     }
 
     const handleEditChange = (e, data, type) => {
-        const comment = [...comments]
+        const comment = [...commentList]
         const index = comment.indexOf(data)
         comment[index] = { ...comment[index] }
         comment[index].content = e.target.value
@@ -71,7 +73,7 @@ export default function CommentList({ comments, article, handleEditSubmit, fetch
             {commentList.map((comment) => (
                 <CommentItem
                     comment={comment}
-                    comments={comments}
+                    commentList={commentList}
                     setCommentList={setCommentList}
                     article={article}
                     key={comment.id}

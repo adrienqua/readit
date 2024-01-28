@@ -41,8 +41,14 @@ const Comments = (props) => {
             return history.push("/login")
         }
 
-        await newComment(addComment)
-        await fetchComments()
+        await newComment(addComment).then((res) => {
+            const commentsClone = [...comments]
+            commentsClone.unshift(res.data)
+
+            setComments(commentsClone)
+            console.log(res.data)
+        })
+        //await fetchComments()
         toast.success("Commentaire ajouté.")
     }
 
