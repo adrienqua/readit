@@ -5,7 +5,9 @@ Readit is a content feed single page application inspired by Reddit with publica
 
 ## Requirements
 Node 16+ [Node](https://nodejs.org/en)
+
 PHP 8.0 [PHP](https://www.php.net/)
+
 Symfony cli [Symfony](https://symfony.com/download)
 
 ## Getting Started
