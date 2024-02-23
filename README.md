@@ -1,4 +1,4 @@
-This is a [Symfony 5.3](https://symfony.com/) project.
+This is a [Symfony 5.3](https://symfony.com/) and [React](https://fr.react.dev/) project.
 
 ## About
 Readit is a content feed single page application inspired by Reddit with publications, vote and like feature, infinite nested comments and more.
